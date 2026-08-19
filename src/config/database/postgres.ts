@@ -1,5 +1,11 @@
 import { Pool, type PoolClient } from 'pg';
-import type { BaseDatabaseConfig, DatabaseClient, TransactionClient, QueryResult, QueryResultRow } from './types';
+import type {
+    BaseDatabaseConfig,
+    DatabaseClient,
+    TransactionClient,
+    QueryResult,
+    QueryResultRow,
+} from './types';
 import { logger } from '../logger';
 
 export class PostgresClient implements DatabaseClient {
@@ -31,7 +37,10 @@ export class PostgresClient implements DatabaseClient {
         });
     }
 
-    async query<T extends QueryResultRow = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
+    async query<T extends QueryResultRow = any>(
+        text: string,
+        params?: any[],
+    ): Promise<QueryResult<T>> {
         if (this.isClosed) {
             throw new Error('Database already closed');
         }
@@ -59,7 +68,10 @@ export class PostgresClient implements DatabaseClient {
 
         const client: PoolClient = await this.pool.connect();
         const txClient: TransactionClient = {
-            query: async <T extends QueryResultRow = any>(text: string, params?: any[]): Promise<QueryResult<T>> => {
+            query: async <T extends QueryResultRow = any>(
+                text: string,
+                params?: any[],
+            ): Promise<QueryResult<T>> => {
                 const result = await client.query<T>(text, params);
                 return {
                     rows: result.rows,

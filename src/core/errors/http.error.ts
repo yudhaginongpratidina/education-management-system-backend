@@ -4,7 +4,13 @@ export class HttpError extends Error {
     public isOperational: boolean;
     public details?: any;
 
-    constructor(status: number, message: string, code: string, isOperational: boolean, details?: any) {
+    constructor(
+        status: number,
+        message: string,
+        code: string,
+        isOperational: boolean,
+        details?: any,
+    ) {
         super(message);
 
         this.status = status;

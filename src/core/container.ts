@@ -8,5 +8,5 @@ export interface Container {
 
 export const container: Container = {
     logger,
-    db: databaseManager
+    db: databaseManager,
 };

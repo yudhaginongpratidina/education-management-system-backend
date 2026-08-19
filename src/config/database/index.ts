@@ -1,5 +1,5 @@
 import { env } from '../env';
-import type { BaseDatabaseConfig, DatabaseClient} from './types';
+import type { BaseDatabaseConfig, DatabaseClient } from './types';
 import { PostgresClient } from './postgres';
 import { MysqlClient } from './mysql';
 
@@ -39,7 +39,6 @@ class DatabaseManager {
         }
         return client;
     }
-
 
     // -----------------------------------------------------------------------
     // GET DB BY NAME

@@ -85,7 +85,10 @@ const getDatabases = (rawConfig: any): any[] => {
             const cleanedJson = (rawConfig.DATABASES as string).trim().replace(/\\n/g, '\n');
             dbs = JSON.parse(cleanedJson);
         } catch (err) {
-            console.warn('⚠️  Failed to parse DATABASES JSON. Error:', err instanceof Error ? err.message : err);
+            console.warn(
+                '⚠️  Failed to parse DATABASES JSON. Error:',
+                err instanceof Error ? err.message : err,
+            );
             console.warn('Trying prefix-based config instead...');
         }
     }
@@ -113,7 +116,9 @@ const getDatabases = (rawConfig: any): any[] => {
             if (field === 'connection_timeout') targetField = 'connectionTimeout';
 
             // Handle types safely
-            if (['port', 'maxConnection', 'idleTimeout', 'connectionTimeout'].includes(targetField)) {
+            if (
+                ['port', 'maxConnection', 'idleTimeout', 'connectionTimeout'].includes(targetField)
+            ) {
                 const num = Number(value);
                 if (!isNaN(num)) {
                     prefixDbs[dbId][targetField] = num;
@@ -157,7 +162,9 @@ const getDatabases = (rawConfig: any): any[] => {
     }
 
     if (combined.length === 0) {
-        console.error('❌ No database configuration found. Please provide DATABASES or DB_* variables.');
+        console.error(
+            '❌ No database configuration found. Please provide DATABASES or DB_* variables.',
+        );
         process.exit(1);
     }
 

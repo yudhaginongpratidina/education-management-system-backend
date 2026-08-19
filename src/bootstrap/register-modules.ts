@@ -17,7 +17,10 @@ const MODULE_INIT_STRATEGY = {
 // REGISTER ALL MODULES
 export const registerModules = async (app: Express) => {
     const logger = container.logger;
-    logger.info({ action: 'modules_register_start', total: modules.length }, '🚀 Registering modules...');
+    logger.info(
+        { action: 'modules_register_start', total: modules.length },
+        '🚀 Registering modules...',
+    );
     for (const module of modules) {
         const start = Date.now();
         logger.info(

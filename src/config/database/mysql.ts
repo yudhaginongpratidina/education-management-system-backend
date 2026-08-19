@@ -1,5 +1,16 @@
-import mysql, { type Pool, type PoolConnection, type ResultSetHeader, type RowDataPacket } from 'mysql2/promise';
-import type { BaseDatabaseConfig, DatabaseClient, TransactionClient, QueryResult, QueryResultRow } from './types';
+import mysql, {
+    type Pool,
+    type PoolConnection,
+    type ResultSetHeader,
+    type RowDataPacket,
+} from 'mysql2/promise';
+import type {
+    BaseDatabaseConfig,
+    DatabaseClient,
+    TransactionClient,
+    QueryResult,
+    QueryResultRow,
+} from './types';
 import { logger } from '../logger';
 
 export class MysqlClient implements DatabaseClient {
@@ -24,13 +35,19 @@ export class MysqlClient implements DatabaseClient {
         logger.info({ db: config.name }, 'MySQL pool initialized');
     }
 
-    async query<T extends QueryResultRow = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
+    async query<T extends QueryResultRow = any>(
+        text: string,
+        params?: any[],
+    ): Promise<QueryResult<T>> {
         if (this.isClosed) {
             throw new Error('Database already closed');
         }
 
         try {
-            const [rows] = await this.pool.execute<(T[] & RowDataPacket[][]) | ResultSetHeader>(text, params);
+            const [rows] = await this.pool.execute<(T[] & RowDataPacket[][]) | ResultSetHeader>(
+                text,
+                params,
+            );
 
             // mysql2 returns an array where the first element is the result.
             // If it's a SELECT, it's an array of rows.
@@ -54,12 +71,19 @@ export class MysqlClient implements DatabaseClient {
 
         const connection: PoolConnection = await this.pool.getConnection();
         const txClient: TransactionClient = {
-            query: async <T extends QueryResultRow = any>(text: string, params?: any[]): Promise<QueryResult<T>> => {
-                const [rows] = await connection.execute<(T[] & RowDataPacket[][]) | ResultSetHeader>(text, params);
+            query: async <T extends QueryResultRow = any>(
+                text: string,
+                params?: any[],
+            ): Promise<QueryResult<T>> => {
+                const [rows] = await connection.execute<
+                    (T[] & RowDataPacket[][]) | ResultSetHeader
+                >(text, params);
                 const isArray = Array.isArray(rows);
                 return {
                     rows: isArray ? (rows as T[]) : ([] as T[]),
-                    rowCount: isArray ? (rows as T[]).length : (rows as ResultSetHeader).affectedRows,
+                    rowCount: isArray
+                        ? (rows as T[]).length
+                        : (rows as ResultSetHeader).affectedRows,
                 };
             },
         };
