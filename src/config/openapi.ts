@@ -1,9 +1,9 @@
 import { apiReference } from '@scalar/express-api-reference';
 import type { Express } from 'express';
-import { env } from './env';
 
 // sub open api
 import { roleOpenApi } from '../modules/role-management/role.openapi';
+import { menuOpenApi } from '../modules/menu-management/menu.openapi';
 
 export const setupOpenApi = (app: Express) => {
     const openApiSpecification = {
@@ -32,6 +32,7 @@ export const setupOpenApi = (app: Express) => {
                 },
             },
             ...roleOpenApi.paths,
+            ...menuOpenApi.paths,
         },
         components: {
             securitySchemes: {
@@ -43,6 +44,7 @@ export const setupOpenApi = (app: Express) => {
             },
             schemas: {
                 ...roleOpenApi.components.schemas,
+                ...menuOpenApi.components.schemas,
             },
         },
     };
