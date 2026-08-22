@@ -3,8 +3,7 @@ import type { Express } from 'express';
 import { env } from './env';
 
 // sub open api
-// import { tenantOpenApi } from '../module/tenant/tenant.openapi';
-// import { tenantDatabaseOpenApi } from '../module/tenant-database/tenant-database.openapi';
+import { roleOpenApi } from '../modules/role-management/role.openapi';
 
 export const setupOpenApi = (app: Express) => {
     const openApiSpecification = {
@@ -32,8 +31,7 @@ export const setupOpenApi = (app: Express) => {
                     },
                 },
             },
-            // ...tenantOpenApi.paths,
-            // ...tenantDatabaseOpenApi.paths,
+            ...roleOpenApi.paths,
         },
         components: {
             securitySchemes: {
@@ -44,8 +42,7 @@ export const setupOpenApi = (app: Express) => {
                 },
             },
             schemas: {
-                // ...tenantOpenApi.components.schemas,
-                // ...tenantDatabaseOpenApi.components.schemas,
+                ...roleOpenApi.components.schemas,
             },
         },
     };
