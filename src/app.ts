@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import cors from 'cors';
 
+import { setupOpenApi } from './config/openapi';
 import { container } from './core/container';
 import { env } from './config/env';
 
@@ -45,6 +46,9 @@ export const createApp = (): Express => {
 
     // 📊 RESPONSE LOGGER
     app.use(responseLoggerMiddleware);
+
+    // 📖 OPENAPI DOCS (SCALAR)
+    setupOpenApi(app);
 
     // ❤️ HEALTH CHECK
     app.get('/health', (req, res) => {

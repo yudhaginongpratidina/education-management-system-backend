@@ -24,6 +24,7 @@
         "typescript": "^5"
     },
     "dependencies": {
+        "@scalar/express-api-reference": "^0.10.16",
         "bcrypt": "^6.0.0",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.6",

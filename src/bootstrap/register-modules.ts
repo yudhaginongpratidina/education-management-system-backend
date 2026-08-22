@@ -8,8 +8,9 @@ import { container } from '../core/container';
 // MODULES
 import { roleModule } from '../modules/role-management/index';
 import { menuModule } from '../modules/menu-management/index';
+import { roleMenuModule } from '../modules/role-menu-management/index';
 
-const modules: Module[] = [roleModule, menuModule];
+const modules: Module[] = [roleModule, menuModule, roleMenuModule];
 
 // STRATEGY CONFIG
 // TRUE = HARD FAIL | FALSE = SKIP
