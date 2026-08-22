@@ -9,8 +9,9 @@ import { container } from '../core/container';
 import { roleModule } from '../modules/role-management/index';
 import { menuModule } from '../modules/menu-management/index';
 import { roleMenuModule } from '../modules/role-menu-management/index';
+import { userModule } from '../modules/user-management/index';
 
-const modules: Module[] = [roleModule, menuModule, roleMenuModule];
+const modules: Module[] = [roleModule, menuModule, roleMenuModule, userModule];
 
 // STRATEGY CONFIG
 // TRUE = HARD FAIL | FALSE = SKIP
