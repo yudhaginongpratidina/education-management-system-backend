@@ -37,3 +37,16 @@ CREATE TABLE menus (
     CONSTRAINT fk_menus_parent FOREIGN KEY (parent_id) REFERENCES menus (id) ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT chk_menus_type CHECK (type IN ('GROUP', 'ITEM'))
 );
+
+-- ============================================================
+-- TABEL ROLE MENU MANAGEMENT
+-- ============================================================
+CREATE TABLE role_menus (
+    role_id BIGINT UNSIGNED NOT NULL,
+    menu_id BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (role_id, menu_id),
+    INDEX idx_role_menus_role_id (role_id),
+    INDEX idx_role_menus_menu_id (menu_id),
+    CONSTRAINT fk_role_menus_role FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_role_menus_menu FOREIGN KEY (menu_id) REFERENCES menus (id) ON DELETE CASCADE ON UPDATE CASCADE
+)
