@@ -30,7 +30,7 @@ export const roleMenuModule: Module = {
         const controller = new RoleMenuController(service);
         const routes = new RoleMenuRoutes(controller);
 
-        app.use('/menus', routes.router());
+        app.use('/role-menus', routes.router());
     },
 
     async onInit(container) {

@@ -41,9 +41,10 @@ export class RoleMenuRepository implements IRoleMenuRepository {
         await this.db.query(`DELETE FROM role_menus WHERE role_id = ?;`, [data.role_id]);
 
         if (data.menu_ids.length > 0) {
-            const values = data.menu_ids.map((menu_id) => [data.role_id, menu_id]);
-            const query = `INSERT INTO role_menus (role_id, menu_id) VALUES ?;`;
-            await this.db.query(query, [values]);
+            const placeholders = data.menu_ids.map(() => '(?, ?)').join(', ');
+            const values = data.menu_ids.flatMap((menu_id) => [data.role_id, menu_id]);
+            const query = `INSERT INTO role_menus (role_id, menu_id) VALUES ${placeholders};`;
+            await this.db.query(query, values);
         }
         return { success: true };
     }
