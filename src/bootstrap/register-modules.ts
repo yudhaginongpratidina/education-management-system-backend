@@ -6,7 +6,9 @@ import type { Module } from '../core/module';
 import { container } from '../core/container';
 
 // MODULES
-const modules: Module[] = [];
+import { roleModule } from '../modules/role-management/index';
+
+const modules: Module[] = [roleModule];
 
 // STRATEGY CONFIG
 // TRUE = HARD FAIL | FALSE = SKIP
