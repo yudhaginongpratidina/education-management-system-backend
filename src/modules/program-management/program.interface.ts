@@ -3,6 +3,7 @@ import type { Request, Response, NextFunction } from 'express';
 export interface IProgramRepository {
     create_program(data: {
         name: string;
+        slug: string;
         description?: string;
         requirements?: string;
         price_per_session: number;
@@ -23,7 +24,8 @@ export interface IProgramRepository {
     ): Promise<any>;
 
     update_program(data: {
-        slug: string;
+        old_slug: string;
+        new_slug: string;
         name: string;
         description?: string;
         requirements?: string;

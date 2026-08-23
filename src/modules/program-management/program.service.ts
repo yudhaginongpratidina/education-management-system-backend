@@ -2,6 +2,9 @@
 import { HttpError } from '../../core/errors/http.error';
 import type { IProgramRepository, IProgramService } from './program.interface';
 
+// utils
+import { create_slug } from '../../shared/libs/slug';
+
 export class ProgramService implements IProgramService {
     constructor(
         private repo: IProgramRepository,
@@ -15,7 +18,14 @@ export class ProgramService implements IProgramService {
         price_per_session: number;
         status?: 'ACTIVE' | 'INACTIVE';
     }): Promise<any> {
-        const response = await this.repo.create_program(data);
+        const slug = create_slug(data.name);
+        const existingProgram = await this.repo.get_program({ slug: slug });
+
+        if (existingProgram.length > 0) {
+            throw new HttpError(400, 'Program already exists', 'PROGRAM_ALREADY_EXISTS', true);
+        }
+
+        const response = await this.repo.create_program({ ...data, slug });
         return response;
     }
 
@@ -46,7 +56,23 @@ export class ProgramService implements IProgramService {
             throw new HttpError(404, 'Program not found', 'PROGRAM_NOT_FOUND', true);
         }
 
-        return await this.repo.update_program(data);
+        const newSlug = create_slug(data.name);
+        if (newSlug !== data.slug) {
+            const programWithNewSlug = await this.repo.get_program({ slug: newSlug });
+            if (programWithNewSlug.length > 0) {
+                throw new HttpError(400, 'Program already exists', 'PROGRAM_ALREADY_EXISTS', true);
+            }
+        }
+
+        return await this.repo.update_program({
+            old_slug: data.slug,
+            new_slug: newSlug,
+            name: data.name,
+            description: data.description,
+            requirements: data.requirements,
+            price_per_session: data.price_per_session,
+            status: data.status,
+        });
     }
 
     async delete_program(slug: string): Promise<any> {

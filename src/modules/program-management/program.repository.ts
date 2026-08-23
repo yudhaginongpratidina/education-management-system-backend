@@ -2,23 +2,20 @@
 import type { DatabaseClient } from '../../config/database/types';
 import type { IProgramRepository } from './program.interface';
 
-// utils
-import { create_slug } from '../../shared/libs/slug';
-
 export class ProgramRepository implements IProgramRepository {
     constructor(private readonly db: DatabaseClient) {}
 
     async create_program(data: {
         name: string;
+        slug: string;
         description?: string;
         requirements?: string;
         price_per_session: number;
         status?: 'ACTIVE' | 'INACTIVE';
     }): Promise<any> {
-        const slug = create_slug(data.name);
         const query = `INSERT INTO programs (slug, name, description, requirements, price_per_session, status) VALUES (?, ?, ?, ?, ?, ?);`;
         await this.db.query(query, [
-            slug,
+            data.slug,
             data.name,
             data.description ?? null,
             data.requirements ?? null,
@@ -27,7 +24,7 @@ export class ProgramRepository implements IProgramRepository {
         ]);
 
         const selectQuery = `SELECT * FROM programs WHERE slug = ? LIMIT 1;`;
-        const result = await this.db.query(selectQuery, [slug]);
+        const result = await this.db.query(selectQuery, [data.slug]);
         return result.rows[0];
     }
 
@@ -70,25 +67,27 @@ export class ProgramRepository implements IProgramRepository {
     }
 
     async update_program(data: {
-        slug: string;
+        old_slug: string;
+        new_slug: string;
         name: string;
         description?: string;
         requirements?: string;
         price_per_session: number;
         status?: 'ACTIVE' | 'INACTIVE';
     }): Promise<any> {
-        const query = `UPDATE programs SET name = ?, description = ?, requirements = ?, price_per_session = ?, status = ? WHERE slug = ?;`;
+        const query = `UPDATE programs SET slug = ?, name = ?, description = ?, requirements = ?, price_per_session = ?, status = ? WHERE slug = ?;`;
         await this.db.query(query, [
+            data.new_slug,
             data.name,
             data.description ?? null,
             data.requirements ?? null,
             data.price_per_session,
             data.status ?? 'ACTIVE',
-            data.slug,
+            data.old_slug,
         ]);
 
         const selectQuery = `SELECT * FROM programs WHERE slug = ? LIMIT 1;`;
-        const result = await this.db.query(selectQuery, [data.slug]);
+        const result = await this.db.query(selectQuery, [data.new_slug]);
         return result.rows[0];
     }
 
