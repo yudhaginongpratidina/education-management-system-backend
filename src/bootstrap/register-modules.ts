@@ -10,8 +10,9 @@ import { roleModule } from '../modules/role-management/index';
 import { menuModule } from '../modules/menu-management/index';
 import { roleMenuModule } from '../modules/role-menu-management/index';
 import { userModule } from '../modules/user-management/index';
+import { authModule } from '../modules/authentication/index';
 
-const modules: Module[] = [roleModule, menuModule, roleMenuModule, userModule];
+const modules: Module[] = [roleModule, menuModule, roleMenuModule, userModule, authModule];
 
 // STRATEGY CONFIG
 // TRUE = HARD FAIL | FALSE = SKIP
