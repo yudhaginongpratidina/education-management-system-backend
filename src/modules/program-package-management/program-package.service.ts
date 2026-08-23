@@ -26,7 +26,7 @@ export class ProgramPackageService implements IProgramPackageService {
         program_slug: string;
         name: string;
         duration_months: number;
-        sessions_count: number;
+        sessions_per_period: number;
         session_period: 'WEEK' | 'MONTH' | 'DURATION';
         normal_price: number;
         selling_price: number;
@@ -46,7 +46,7 @@ export class ProgramPackageService implements IProgramPackageService {
             name: data.name,
             slug,
             duration_months: data.duration_months,
-            sessions_count: data.sessions_count,
+            sessions_per_period: data.sessions_per_period,
             session_period: data.session_period,
             normal_price: data.normal_price,
             selling_price: data.selling_price,
@@ -70,9 +70,10 @@ export class ProgramPackageService implements IProgramPackageService {
 
     async update_package(data: {
         slug: string;
+        program_slug: string;
         name: string;
         duration_months: number;
-        sessions_count: number;
+        sessions_per_period: number;
         session_period: 'WEEK' | 'MONTH' | 'DURATION';
         normal_price: number;
         selling_price: number;
@@ -84,6 +85,7 @@ export class ProgramPackageService implements IProgramPackageService {
             throw new HttpError(404, 'Package not found', 'PACKAGE_NOT_FOUND', true);
         }
 
+        const program_id = await this.get_program_id_by_slug(data.program_slug);
         const newSlug = create_slug(data.name);
         if (newSlug !== data.slug) {
             const packageWithNewSlug = await this.repo.get_packages({ slug: newSlug });
@@ -95,10 +97,10 @@ export class ProgramPackageService implements IProgramPackageService {
         return await this.repo.update_package({
             old_slug: data.slug,
             new_slug: newSlug,
-            program_id: existing[0].program_id,
+            program_id,
             name: data.name,
             duration_months: data.duration_months,
-            sessions_count: data.sessions_count,
+            sessions_per_period: data.sessions_per_period,
             session_period: data.session_period,
             normal_price: data.normal_price,
             selling_price: data.selling_price,

@@ -2,9 +2,10 @@ import { z } from 'zod';
 
 export const programPackageSchema = z.object({
     body: z.object({
+        program_slug: z.string().min(1, 'Program slug is required'),
         name: z.string().min(1, 'Name is required'),
         duration_months: z.number().int().min(1, 'Duration must be 1 or greater'),
-        sessions_count: z.number().int().min(1, 'Sessions count must be 1 or greater'),
+        sessions_per_period: z.number().int().min(1, 'Sessions per period must be 1 or greater'),
         session_period: z.enum(['WEEK', 'MONTH', 'DURATION']),
         normal_price: z.number().min(0, 'Normal price must be 0 or greater'),
         selling_price: z.number().min(0, 'Selling price must be 0 or greater'),

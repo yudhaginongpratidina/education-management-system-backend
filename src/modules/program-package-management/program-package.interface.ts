@@ -6,7 +6,7 @@ export interface IProgramPackageRepository {
         name: string;
         slug: string;
         duration_months: number;
-        sessions_count: number;
+        sessions_per_period: number;
         session_period: 'WEEK' | 'MONTH' | 'DURATION';
         normal_price: number;
         selling_price: number;
@@ -33,7 +33,7 @@ export interface IProgramPackageRepository {
         program_id: number;
         name: string;
         duration_months: number;
-        sessions_count: number;
+        sessions_per_period: number;
         session_period: 'WEEK' | 'MONTH' | 'DURATION';
         normal_price: number;
         selling_price: number;
@@ -49,7 +49,7 @@ export interface IProgramPackageService {
         program_slug: string;
         name: string;
         duration_months: number;
-        sessions_count: number;
+        sessions_per_period: number;
         session_period: 'WEEK' | 'MONTH' | 'DURATION';
         normal_price: number;
         selling_price: number;
@@ -71,9 +71,10 @@ export interface IProgramPackageService {
 
     update_package(data: {
         slug: string;
+        program_slug: string;
         name: string;
         duration_months: number;
-        sessions_count: number;
+        sessions_per_period: number;
         session_period: 'WEEK' | 'MONTH' | 'DURATION';
         normal_price: number;
         selling_price: number;

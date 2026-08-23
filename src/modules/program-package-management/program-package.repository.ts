@@ -10,20 +10,20 @@ export class ProgramPackageRepository implements IProgramPackageRepository {
         name: string;
         slug: string;
         duration_months: number;
-        sessions_count: number;
+        sessions_per_period: number;
         session_period: 'WEEK' | 'MONTH' | 'DURATION';
         normal_price: number;
         selling_price: number;
         bonus_duration_months: number;
         status: 'ACTIVE' | 'INACTIVE';
     }): Promise<any> {
-        const query = `INSERT INTO program_packages (program_id, name, slug, duration_months, sessions_count, session_period, normal_price, selling_price, bonus_duration_months, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
+        const query = `INSERT INTO program_packages (program_id, name, slug, duration_months, sessions_per_period, session_period, normal_price, selling_price, bonus_duration_months, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
         await this.db.query(query, [
             data.program_id,
             data.name,
             data.slug,
             data.duration_months,
-            data.sessions_count,
+            data.sessions_per_period,
             data.session_period,
             data.normal_price,
             data.selling_price,
@@ -85,19 +85,20 @@ export class ProgramPackageRepository implements IProgramPackageRepository {
         program_id: number;
         name: string;
         duration_months: number;
-        sessions_count: number;
+        sessions_per_period: number;
         session_period: 'WEEK' | 'MONTH' | 'DURATION';
         normal_price: number;
         selling_price: number;
         bonus_duration_months: number;
         status: 'ACTIVE' | 'INACTIVE';
     }): Promise<any> {
-        const query = `UPDATE program_packages SET slug = ?, name = ?, duration_months = ?, sessions_count = ?, session_period = ?, normal_price = ?, selling_price = ?, bonus_duration_months = ?, status = ? WHERE slug = ?;`;
+        const query = `UPDATE program_packages SET program_id = ?, slug = ?, name = ?, duration_months = ?, sessions_per_period = ?, session_period = ?, normal_price = ?, selling_price = ?, bonus_duration_months = ?, status = ? WHERE slug = ?;`;
         await this.db.query(query, [
+            data.program_id,
             data.new_slug,
             data.name,
             data.duration_months,
-            data.sessions_count,
+            data.sessions_per_period,
             data.session_period,
             data.normal_price,
             data.selling_price,

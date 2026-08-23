@@ -27,7 +27,7 @@ const modules: Module[] = [
     authModule,
     programModule,
     programLevelModule,
-    programPackageModule
+    programPackageModule,
 ];
 
 // STRATEGY CONFIG

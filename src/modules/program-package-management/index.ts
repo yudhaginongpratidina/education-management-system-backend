@@ -17,7 +17,11 @@ export const programPackageModule: Module = {
 
         const program_package_repository = new ProgramPackageRepository(database);
         const program_repository = new ProgramRepository(database);
-        const service = new ProgramPackageService(program_package_repository, program_repository, container);
+        const service = new ProgramPackageService(
+            program_package_repository,
+            program_repository,
+            container,
+        );
         const controller = new ProgramPackageController(service);
         const routes = new ProgramPackageRoutes(controller);
 

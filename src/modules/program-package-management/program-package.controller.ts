@@ -45,6 +45,7 @@ export class ProgramPackageController implements IProgramPackageController {
         try {
             const response = await this.service.update_package({
                 slug: req.params.slug,
+                program_slug: req.body.program_slug,
                 ...req.body,
             });
             res.status(200).json({ success: true, message: 'Package updated', data: response });

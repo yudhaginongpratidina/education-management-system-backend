@@ -5,10 +5,15 @@ import type { Express } from 'express';
 import { roleOpenApi } from '../modules/role-management/role.openapi';
 import { menuOpenApi } from '../modules/menu-management/menu.openapi';
 import { roleMenuOpenApi } from '../modules/role-menu-management/role-menu.openapi';
+
+// sub open api
 import { userOpenApi } from '../modules/user-management/user.openapi';
 import { authOpenApi } from '../modules/authentication/auth.openapi';
+
+// sub open api
 import { programOpenApi } from '../modules/program-management/program.openapi';
 import { programLevelOpenApi } from '../modules/program-level-management/program-level.openapi';
+import { programPackageOpenApi } from '../modules/program-package-management/program-package.openapi';
 
 export const setupOpenApi = (app: Express) => {
     const openApiSpecification = {
@@ -43,6 +48,7 @@ export const setupOpenApi = (app: Express) => {
             ...authOpenApi.paths,
             ...programOpenApi.paths,
             ...programLevelOpenApi.paths,
+            ...programPackageOpenApi.paths,
         },
         components: {
             securitySchemes: {
@@ -60,6 +66,7 @@ export const setupOpenApi = (app: Express) => {
                 ...authOpenApi.components.schemas,
                 ...programOpenApi.components.schemas,
                 ...programLevelOpenApi.components.schemas,
+                ...programPackageOpenApi.components.schemas,
             },
         },
     };
@@ -70,7 +77,7 @@ export const setupOpenApi = (app: Express) => {
             spec: {
                 content: openApiSpecification,
             },
-            theme: 'purple',
+            theme: 'fastify',
             layout: 'modern',
         }),
     );
