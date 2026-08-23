@@ -9,8 +9,8 @@ import { ProgramLevelService } from './program-level.service';
 import { ProgramLevelController } from './program-level.controller';
 import { ProgramLevelRoutes } from './program-level.route';
 
-export const menuModule: Module = {
-    name: 'menu',
+export const programLevelModule: Module = {
+    name: 'program-level',
 
     register: (app: Express, container) => {
         const database = container.db.get('main');
@@ -29,10 +29,10 @@ export const menuModule: Module = {
     },
 
     async onInit(container) {
-        container.logger.info({ module: 'menu' }, 'Menu module initialized');
+        container.logger.info({ module: 'program-level' }, 'Program level module initialized');
     },
 
     async onDestroy(container) {
-        container.logger.info({ module: 'menu' }, 'Menu module destroyed');
+        container.logger.info({ module: 'program level' }, 'Program level module destroyed');
     },
 };

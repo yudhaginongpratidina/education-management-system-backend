@@ -16,6 +16,7 @@ import { authModule } from '../modules/authentication/index';
 
 // MODULES
 import { programModule } from '../modules/program-management/index';
+import { programLevelModule } from '../modules/program-level-management/index';
 
 const modules: Module[] = [
     roleModule,
@@ -24,6 +25,7 @@ const modules: Module[] = [
     userModule,
     authModule,
     programModule,
+    programLevelModule,
 ];
 
 // STRATEGY CONFIG
