@@ -56,7 +56,10 @@ export class ProgramPackageController implements IProgramPackageController {
 
     delete_package = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
         try {
-            await this.service.delete_package(req.params.slug as string);
+            await this.service.delete_package({
+                program_slug: req.params.program_slug,
+                slug: req.params.slug,
+            });
             res.status(200).json({ success: true, message: 'Package deleted' });
         } catch (error) {
             next(error);

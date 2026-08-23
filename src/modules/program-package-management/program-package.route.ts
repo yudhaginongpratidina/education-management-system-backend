@@ -23,7 +23,7 @@ export class ProgramPackageRoutes {
             validate(programPackageSchema),
             asyncHandler(this.controller.update_package),
         );
-        router.delete('/:slug', asyncHandler(this.controller.delete_package));
+        router.delete('/:program_slug/:slug', asyncHandler(this.controller.delete_package));
 
         return router;
     }

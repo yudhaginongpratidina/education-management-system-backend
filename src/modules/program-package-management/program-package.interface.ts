@@ -82,7 +82,7 @@ export interface IProgramPackageService {
         status?: 'ACTIVE' | 'INACTIVE';
     }): Promise<any>;
 
-    delete_package(slug: string): Promise<any>;
+    delete_package(data: { program_slug: string; slug: string }): Promise<any>;
 }
 
 export interface IProgramPackageController {

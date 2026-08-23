@@ -109,12 +109,14 @@ export class ProgramPackageService implements IProgramPackageService {
         });
     }
 
-    async delete_package(slug: string): Promise<any> {
-        const existing = await this.repo.get_packages({ slug });
+    async delete_package(data: { program_slug: string; slug: string }): Promise<any> {
+        const program_id = await this.get_program_id_by_slug(data.program_slug);
+
+        const existing = await this.repo.get_packages({ program_id, slug: data.slug });
         if (existing.length === 0) {
             throw new HttpError(404, 'Package not found', 'PACKAGE_NOT_FOUND', true);
         }
 
-        return await this.repo.delete_package(slug);
+        return await this.repo.delete_package(data.slug);
     }
 }

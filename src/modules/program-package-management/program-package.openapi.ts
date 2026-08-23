@@ -102,11 +102,19 @@ export const programPackageOpenApi = {
                     '404': { description: 'Package not found' },
                 },
             },
+        },
+        '/program-packages/{program_slug}/{slug}': {
             delete: {
                 tags: ['Program-Package Management'],
                 summary: 'Delete package',
                 security: [{ bearerAuth: [] }],
                 parameters: [
+                    {
+                        name: 'program_slug',
+                        in: 'path',
+                        required: true,
+                        schema: { type: 'string' },
+                    },
                     { name: 'slug', in: 'path', required: true, schema: { type: 'string' } },
                 ],
                 responses: {
