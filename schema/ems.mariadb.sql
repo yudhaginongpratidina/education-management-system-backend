@@ -130,7 +130,7 @@ CREATE TABLE program_packages (
     name VARCHAR(100) NOT NULL,
     slug VARCHAR(100) NOT NULL,
     duration_months INT NOT NULL,
-    sessions_count INT NOT NULL,
+    sessions_per_period INT NOT NULL,
     session_period ENUM('WEEK', 'MONTH', 'DURATION') NOT NULL,
     normal_price DECIMAL(12,2) NOT NULL,
     selling_price DECIMAL(12,2) NOT NULL,
@@ -140,5 +140,7 @@ CREATE TABLE program_packages (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
+    UNIQUE KEY uq_program_packages_program_slug (program_id, slug),
+    INDEX idx_program_packages_program_id (program_id),
     CONSTRAINT fk_program_packages_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE
 );
