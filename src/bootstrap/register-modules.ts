@@ -9,10 +9,22 @@ import { container } from '../core/container';
 import { roleModule } from '../modules/role-management/index';
 import { menuModule } from '../modules/menu-management/index';
 import { roleMenuModule } from '../modules/role-menu-management/index';
+
+// MODULES
 import { userModule } from '../modules/user-management/index';
 import { authModule } from '../modules/authentication/index';
 
-const modules: Module[] = [roleModule, menuModule, roleMenuModule, userModule, authModule];
+// MODULES
+import { programModule } from '../modules/program-management/index';
+
+const modules: Module[] = [
+    roleModule,
+    menuModule,
+    roleMenuModule,
+    userModule,
+    authModule,
+    programModule,
+];
 
 // STRATEGY CONFIG
 // TRUE = HARD FAIL | FALSE = SKIP
