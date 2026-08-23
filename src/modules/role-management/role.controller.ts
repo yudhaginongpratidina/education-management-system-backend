@@ -42,22 +42,36 @@ export class RoleController implements IRoleController {
     };
 
     get_role = async (req: Request, res: Response): Promise<any> => {
-        const { limit, page, ...filter } = req.query;
+        const { limit, page, offset, ...filter } = req.query;
+
+        const cleanFilter = Object.fromEntries(
+            Object.entries(filter).filter(
+                ([_, value]) => value !== '' && value !== undefined && value !== null,
+            ),
+        );
 
         let pagination;
-        if (limit && page) {
-            const limitNum = parseInt(limit as string, 10);
-            const pageNum = parseInt(page as string, 10);
+        const limitNum = parseInt(limit as string, 10);
+        if (!isNaN(limitNum) && limitNum > 0) {
+            let offsetNum = 0;
+            if (offset) {
+                offsetNum = parseInt(offset as string, 10);
+            } else if (page) {
+                const pageNum = parseInt(page as string, 10);
+                if (!isNaN(pageNum) && pageNum > 0) {
+                    offsetNum = (pageNum - 1) * limitNum;
+                }
+            }
 
-            if (!isNaN(limitNum) && !isNaN(pageNum) && limitNum > 0 && pageNum > 0) {
+            if (!isNaN(offsetNum) && offsetNum >= 0) {
                 pagination = {
                     limit: limitNum,
-                    offset: (pageNum - 1) * limitNum,
+                    offset: offsetNum,
                 };
             }
         }
 
-        const response = await this.service.get_role(filter as any, pagination);
+        const response = await this.service.get_role(cleanFilter as any, pagination);
         return res.status(200).json({
             success: true,
             message: 'Role fetched successfully',
