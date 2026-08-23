@@ -42,4 +42,10 @@ export class AuthService implements IAuthService {
             access_token,
         };
     }
+
+    async me(user_id: string): Promise<any> {
+        const user = await this.repo.find_user_by_id(user_id);
+        if (!user) throw new HttpError(404, 'User not found', 'USER_NOT_FOUND', true);
+        return user;
+    }
 }

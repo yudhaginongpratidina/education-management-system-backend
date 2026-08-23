@@ -3,7 +3,8 @@ import { Router } from 'express';
 import { asyncHandler } from '../../core/http/async-handler';
 import { validate } from '../../shared/middleware/validate.middleware';
 
-// validation
+// middleware & validation
+import authMiddleware from '../../shared/middleware/auth.middleware';
 import { loginSchema } from './auth.validation';
 
 // interface
@@ -15,6 +16,8 @@ export class AuthRoutes {
     router() {
         const router = Router();
         router.post('/login', validate(loginSchema), asyncHandler(this.controller.login));
+        router.get('/me', authMiddleware, asyncHandler(this.controller.me));
+        router.post('/logout', asyncHandler(this.controller.logout));
         return router;
     }
 }

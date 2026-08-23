@@ -37,6 +37,52 @@ export const authOpenApi = {
                 },
             },
         },
+        '/auth/me': {
+            get: {
+                tags: ['Authentication'],
+                summary: 'Get current user',
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    '200': {
+                        description: 'User details',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        success: { type: 'boolean' },
+                                        data: { type: 'object' },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    '401': { description: 'Unauthorized' },
+                },
+            },
+        },
+        '/auth/logout': {
+            post: {
+                tags: ['Authentication'],
+                summary: 'Logout user',
+                responses: {
+                    '200': {
+                        description: 'Logout successful',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        success: { type: 'boolean' },
+                                        message: { type: 'string' },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
     },
     components: {
         schemas: {
