@@ -1,6 +1,7 @@
 // core and shared
 import { HttpError } from '../../core/errors/http.error';
 import { compare_password } from '../../shared/libs/password';
+import { generate_tokens } from '../../shared/libs/jwt';
 
 // interface
 import type { IAuthRepository, IAuthService } from './auth.interface';
@@ -32,8 +33,13 @@ export class AuthService implements IAuthService {
             );
         }
 
-        // Return user data without password hash
-        const { password_hash, ...userWithoutPassword } = user;
-        return userWithoutPassword;
+        const { access_token } = generate_tokens(user.id.toString(), user.role);
+        return {
+            user: {
+                email: user.email,
+                avatar: user.avatar || null,
+            },
+            access_token,
+        };
     }
 }

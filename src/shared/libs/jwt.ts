@@ -13,7 +13,7 @@ export interface DecodedToken extends JwtPayload {
     sid: string;
 }
 
-export function generate_tokens(id: string) {
+export function generate_tokens(id: string, role?: string) {
     const session_id = randomUUID();
 
     const accessPayload = {
@@ -21,6 +21,7 @@ export function generate_tokens(id: string) {
         sid: session_id,
         iss: env.jwt.issuer,
         aud: env.jwt.audience,
+        role: role || 'user',
     };
 
     const access_token = jwt.sign(accessPayload, env.jwt.accessTokenSecret, {
