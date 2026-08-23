@@ -67,6 +67,8 @@ export class MenuRepository implements IMenuRepository {
             query += ` WHERE ${conditions.join(' AND ')}`;
         }
 
+        query += ` ORDER BY sort_order ASC`;
+
         if (pagination) {
             query += ` LIMIT ? OFFSET ?`;
             values.push(pagination.limit, pagination.offset);
