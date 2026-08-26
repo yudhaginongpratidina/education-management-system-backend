@@ -144,3 +144,34 @@ CREATE TABLE program_packages (
     INDEX idx_program_packages_program_id (program_id),
     CONSTRAINT fk_program_packages_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE
 );
+
+-- ============================================================
+-- TABEL GURU MANAGEMENT
+-- ============================================================
+CREATE TABLE teachers (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    full_name VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    phone_number VARCHAR(20) NULL,
+    address VARCHAR(255) NULL,
+    place_and_dob VARCHAR(255) NULL,
+    last_education VARCHAR(100) NULL,
+    photo VARCHAR(255) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_teachers_slug (slug),
+    INDEX idx_teachers_user_id (user_id),
+    CONSTRAINT fk_teachers_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)
+
+-- ============================================================
+-- TABEL GURU MANAGEMENT
+-- ============================================================
+-- CREATE TABLE teacher_programs (
+--     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+--     teacher_slug VARCHAR(100) NOT NULL,
+--     program_slug VARCHAR(100) NOT NULL,
+-- )
