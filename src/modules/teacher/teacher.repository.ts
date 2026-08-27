@@ -69,22 +69,22 @@ export class TeacherRepository implements ITeacherRepository {
         id: number;
         full_name: string;
         slug: string;
-        user_id: string;
-        phone_number: string;
-        address: string;
-        place_and_dob: string;
-        last_education: string;
-        photo: string;
+        user_id?: string;
+        phone_number: string | null;
+        address: string | null;
+        place_and_dob: string | null;
+        last_education: string | null;
+        photo: string | null;
     }): Promise<any> {
         const query = `UPDATE teachers SET full_name = ?, slug = ?, phone_number = ?, address = ?, place_and_dob = ?, last_education = ?, photo = ? WHERE id = ?;`;
         await this.db.query(query, [
             data.full_name,
             data.slug,
-            data.phone_number,
-            data.address,
-            data.place_and_dob,
-            data.last_education,
-            data.photo,
+            data.phone_number ?? null,
+            data.address ?? null,
+            data.place_and_dob ?? null,
+            data.last_education ?? null,
+            data.photo ?? null,
             data.id,
         ]);
         const selectQuery = `SELECT * FROM teachers WHERE id = ? LIMIT 1;`;

@@ -55,22 +55,26 @@ export class TeacherService implements ITeacherService {
         id: number;
         full_name: string;
         slug: string;
-        user_id: string;
-        phone_number: string;
-        address: string;
-        place_and_dob: string;
-        last_education: string;
-        photo: string;
+        user_id?: string;
+        phone_number: string | null;
+        address: string | null;
+        place_and_dob: string | null;
+        last_education: string | null;
+        photo: string | null;
     }): Promise<any> {
         const slug = create_slug(data.full_name);
-        const user = await this.userRepository.get_user({ id: Number(data.user_id) });
-        if (user.length > 0) {
-            await this.userRepository.update_user({
-                ...user[0],
-                full_name: data.full_name,
-                slug: slug,
-            });
+
+        if (data.user_id) {
+            const user = await this.userRepository.get_user({ id: Number(data.user_id) });
+            if (user.length > 0) {
+                await this.userRepository.update_user({
+                    ...user[0],
+                    full_name: data.full_name,
+                    slug: slug,
+                });
+            }
         }
+
         return await this.teacherRepository.update_teacher({
             ...data,
             slug: slug,

@@ -21,12 +21,12 @@ export interface ITeacherRepository {
         id: number;
         full_name: string;
         slug: string;
-        user_id: string;
-        phone_number: string;
-        address: string;
-        place_and_dob: string;
-        last_education: string;
-        photo: string;
+        user_id?: string;
+        phone_number: string | null;
+        address: string | null;
+        place_and_dob: string | null;
+        last_education: string | null;
+        photo: string | null;
     }): Promise<any>;
     delete_teacher(slug: string): Promise<any>;
 }
@@ -52,12 +52,12 @@ export interface ITeacherService {
         id: number;
         full_name: string;
         slug: string;
-        user_id: string;
-        phone_number: string;
-        address: string;
-        place_and_dob: string;
-        last_education: string;
-        photo: string;
+        user_id?: string;
+        phone_number: string | null;
+        address: string | null;
+        place_and_dob: string | null;
+        last_education: string | null;
+        photo: string | null;
     }): Promise<any>;
     delete_teacher(slug: string): Promise<any>;
 }

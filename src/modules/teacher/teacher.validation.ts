@@ -22,7 +22,10 @@ export const getTeacherSchema = z.object({
 export const updateTeacherSchema = z.object({
     body: z.object({
         full_name: z.string().min(1, 'Full name is required'),
-        user_id: z.string().min(1, 'User ID is required'),
+        user_id: z
+            .union([z.string(), z.number()])
+            .transform((val) => String(val))
+            .optional(),
         phone_number: z.string().optional(),
         address: z.string().optional(),
         place_and_dob: z.string().optional(),

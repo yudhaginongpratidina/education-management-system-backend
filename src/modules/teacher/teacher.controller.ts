@@ -24,8 +24,16 @@ export class TeacherController implements ITeacherController {
 
     update_teacher = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
+            // Find the teacher by slug to get the ID
+            const teachers = await this.teacherService.get_teacher({ slug: req.params.slug });
+            if (!teachers || teachers.length === 0) {
+                res.status(404).json({ message: 'Teacher not found' });
+                return;
+            }
+
             const result = await this.teacherService.update_teacher({
                 ...req.body,
+                id: teachers[0].id,
                 slug: req.params.slug,
             });
             res.status(200).json(result);
