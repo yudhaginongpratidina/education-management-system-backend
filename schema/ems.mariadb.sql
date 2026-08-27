@@ -170,8 +170,13 @@ CREATE TABLE teachers (
 -- ============================================================
 -- TABEL GURU MANAGEMENT
 -- ============================================================
--- CREATE TABLE teacher_programs (
---     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
---     teacher_slug VARCHAR(100) NOT NULL,
---     program_slug VARCHAR(100) NOT NULL,
--- )
+CREATE TABLE teacher_programs (
+    teacher_id BIGINT UNSIGNED NOT NULL,
+    program_id BIGINT UNSIGNED NOT NULL,
+
+    UNIQUE KEY uq_teacher_programs_teacher_program (teacher_id, program_id),
+    INDEX idx_teacher_programs_teacher_id (teacher_id),
+    INDEX idx_teacher_programs_program_id (program_id),
+    CONSTRAINT fk_teacher_programs_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE,
+    CONSTRAINT fk_teacher_programs_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE
+)
