@@ -12,11 +12,14 @@ export class TeacherProgramRepository implements ITeacherProgramRepository {
     ): Promise<any> {
         if (data.length === 0) return;
 
-        const query = `INSERT INTO teacher_programs (teacher_id, program_id) VALUES ?;`;
-        const values = data.map((item) => [item.teacher_id, item.program_id]);
+        // Correct syntax for mysql2/promise execute: (?,?), (?,?)
+        const placeholders = data.map(() => '(?,?)').join(', ');
+        const query = `INSERT INTO teacher_programs (teacher_id, program_id) VALUES ${placeholders};`;
 
-        // Assuming database driver handles batch insert with array of arrays
-        await this.db.query(query, [values]);
+        // Flatten the data into a single array for params
+        const values = data.flatMap((item) => [item.teacher_id, item.program_id]);
+
+        await this.db.query(query, values);
         return { success: true };
     }
 

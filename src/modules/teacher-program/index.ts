@@ -19,7 +19,7 @@ export const teacherProgramModule: Module = {
         const controller = new TeacherProgramController(service);
         const routes = new TeacherProgramRoutes(controller);
 
-        app.use('/teachers-programs', routes.router());
+        app.use('/teacher-programs', routes.router());
     },
 
     async onInit(container) {

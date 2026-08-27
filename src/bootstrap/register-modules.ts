@@ -21,6 +21,7 @@ import { programPackageModule } from '../modules/program-package-management/inde
 
 // MODULES
 import { teacherModule } from '../modules/teacher/index';
+import { teacherProgramModule } from '../modules/teacher-program/index';
 
 const modules: Module[] = [
     roleModule,
@@ -32,6 +33,7 @@ const modules: Module[] = [
     programLevelModule,
     programPackageModule,
     teacherModule,
+    teacherProgramModule,
 ];
 
 // STRATEGY CONFIG
