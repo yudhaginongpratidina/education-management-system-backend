@@ -7,7 +7,7 @@ export class TeacherController implements ITeacherController {
     create_teacher = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const result = await this.teacherService.create_teacher(req.body);
-            res.status(201).json(result);
+            res.status(201).json({ success: true, message: 'Teacher created', data: result });
         } catch (error) {
             next(error);
         }
@@ -16,7 +16,7 @@ export class TeacherController implements ITeacherController {
     get_teacher = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const result = await this.teacherService.get_teacher(req.query as any);
-            res.status(200).json(result);
+            res.status(200).json({ success: true, message: 'Teachers fetched', data: result });
         } catch (error) {
             next(error);
         }
@@ -25,7 +25,7 @@ export class TeacherController implements ITeacherController {
     update_teacher = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             // Find the teacher by slug to get the ID
-            const teachers = await this.teacherService.get_teacher({ slug: req.params.slug });
+            const teachers = await this.teacherService.get_teacher({ slug: req.params.slug as string });
             if (!teachers || teachers.length === 0) {
                 res.status(404).json({ message: 'Teacher not found' });
                 return;
@@ -36,7 +36,7 @@ export class TeacherController implements ITeacherController {
                 id: teachers[0].id,
                 slug: req.params.slug,
             });
-            res.status(200).json(result);
+            res.status(200).json({ success: true, message: 'Teacher updated', data: result });
         } catch (error) {
             next(error);
         }
