@@ -17,21 +17,21 @@ export class StorageRoutes {
 
         router.post(
             '/',
-            authMiddleware,
+            // authMiddleware,
             upload.single('file'),
             asyncHandler(this.controller.upload),
         );
 
         router.get(
             '/:slug',
-            authMiddleware,
+            // authMiddleware,
             validate(getStorageSchema),
             asyncHandler(this.controller.get),
         );
 
         router.delete(
             '/:slug',
-            authMiddleware,
+            // authMiddleware,
             validate(deleteStorageSchema),
             asyncHandler(this.controller.delete),
         );

@@ -21,7 +21,9 @@ export class StorageController implements IStorageController {
         try {
             const slug = req.params.slug as string;
             const fileData = await this.service.get(slug);
-            res.status(200).json({ success: true, data: fileData });
+
+            const filePath = require('path').join(__dirname, '../../../uploads', fileData.slug);
+            res.sendFile(filePath);
         } catch (error) {
             next(error);
         }

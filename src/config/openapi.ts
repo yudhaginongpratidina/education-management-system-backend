@@ -7,6 +7,9 @@ import { menuOpenApi } from '../modules/menu-management/menu.openapi';
 import { roleMenuOpenApi } from '../modules/role-menu-management/role-menu.openapi';
 
 // sub open api
+import { storageOpenApi } from '../modules/storage/storage.openapi';
+
+// sub open api
 import { userOpenApi } from '../modules/user-management/user.openapi';
 import { authOpenApi } from '../modules/authentication/auth.openapi';
 
@@ -46,6 +49,7 @@ export const setupOpenApi = (app: Express) => {
                     },
                 },
             },
+            ...storageOpenApi.paths,
             ...roleOpenApi.paths,
             ...menuOpenApi.paths,
             ...roleMenuOpenApi.paths,
@@ -67,6 +71,7 @@ export const setupOpenApi = (app: Express) => {
                 },
             },
             schemas: {
+                ...storageOpenApi.components.schemas,
                 ...roleOpenApi.components.schemas,
                 ...menuOpenApi.components.schemas,
                 ...roleMenuOpenApi.components.schemas,
