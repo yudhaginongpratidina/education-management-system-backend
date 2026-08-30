@@ -18,6 +18,7 @@ import { programPackageOpenApi } from '../modules/program-package-management/pro
 // sub open api
 import { teacherOpenApi } from '../modules/teacher/teacher.openapi';
 import { teacherProgramOpenApi } from '../modules/teacher-program/teacher-program.openapi';
+import { teacherAvailabilityOpenApi } from '../modules/teacher-availability/teacher-availability.openapi';
 
 export const setupOpenApi = (app: Express) => {
     const openApiSpecification = {
@@ -55,6 +56,7 @@ export const setupOpenApi = (app: Express) => {
             ...programPackageOpenApi.paths,
             ...teacherOpenApi.paths,
             ...teacherProgramOpenApi.paths,
+            ...teacherAvailabilityOpenApi.paths,
         },
         components: {
             securitySchemes: {
@@ -75,6 +77,7 @@ export const setupOpenApi = (app: Express) => {
                 ...programPackageOpenApi.components.schemas,
                 ...teacherOpenApi.components.schemas,
                 ...teacherProgramOpenApi.components.schemas,
+                ...teacherAvailabilityOpenApi.components.schemas,
             },
         },
     };

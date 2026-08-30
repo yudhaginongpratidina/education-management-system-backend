@@ -184,6 +184,26 @@ CREATE TABLE teacher_programs (
 )
 
 -- ============================================================
+-- TABEL GURU AVAILABILITY MANAGEMENT
+-- ============================================================
+CREATE TABLE teacher_availability (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    teacher_id BIGINT UNSIGNED NOT NULL,
+    monday BOOLEAN NOT NULL DEFAULT FALSE,
+    tuesday BOOLEAN NOT NULL DEFAULT FALSE,
+    wednesday BOOLEAN NOT NULL DEFAULT FALSE,
+    thursday BOOLEAN NOT NULL DEFAULT FALSE,
+    friday BOOLEAN NOT NULL DEFAULT FALSE,
+    saturday BOOLEAN NOT NULL DEFAULT FALSE,
+    sunday BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    INDEX idx_teacher_availability_teacher_id (teacher_id),
+    CONSTRAINT fk_teacher_availability_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
+)
+
+-- ============================================================
 -- TABEL STORAGE MANAGEMENT
 -- ============================================================
 CREATE TABLE storages (
