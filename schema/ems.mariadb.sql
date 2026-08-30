@@ -204,6 +204,38 @@ CREATE TABLE teacher_availability (
 )
 
 -- ============================================================
+-- TEACHER ATTANDENT MANAGEMENT
+-- ============================================================
+CREATE TABLE teacher_attendances (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    teacher_id BIGINT UNSIGNED NOT NULL,
+    status ENUM(
+        'PRESENT',
+        'ABSENT',
+        'LEAVE',
+        'OFFLINE',
+        'ONLINE'
+    ) NOT NULL,
+    attendance_date DATE NOT NULL,
+    check_in_at TIMESTAMP NULL,
+    check_out_at TIMESTAMP NULL,
+    photo VARCHAR(255) NULL,
+    latitude DECIMAL(10,8) NULL,
+    longitude DECIMAL(11,8) NULL,
+    notes VARCHAR(255) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_attendances_teacher_date (teacher_id, attendance_date),
+    INDEX idx_attendances_teacher_id (teacher_id),
+    INDEX idx_attendances_date (attendance_date),
+    CONSTRAINT fk_attendances_teacher
+        FOREIGN KEY (teacher_id)
+        REFERENCES teachers(id)
+        ON DELETE CASCADE
+);
+
+-- ============================================================
 -- TABEL STORAGE MANAGEMENT
 -- ============================================================
 CREATE TABLE storages (
