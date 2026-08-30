@@ -9,7 +9,9 @@ export interface ITeacherRepository {
         address: string;
         place_and_dob: string;
         last_education: string;
+        position: string;
         photo: string;
+        still_actively_working: boolean;
     }): Promise<any>;
     get_teacher(filter: {
         id?: number;
@@ -26,7 +28,9 @@ export interface ITeacherRepository {
         address: string | null;
         place_and_dob: string | null;
         last_education: string | null;
+        position: string | null;
         photo: string | null;
+        still_actively_working: boolean;
     }): Promise<any>;
     delete_teacher(slug: string): Promise<any>;
 }
@@ -40,7 +44,9 @@ export interface ITeacherService {
         address: string;
         place_and_dob: string;
         last_education: string;
+        position: string;
         photo: string;
+        still_actively_working: boolean;
     }): Promise<any>;
     get_teacher(filter: {
         id?: number;
@@ -57,7 +63,9 @@ export interface ITeacherService {
         address: string | null;
         place_and_dob: string | null;
         last_education: string | null;
+        position: string | null;
         photo: string | null;
+        still_actively_working: boolean;
     }): Promise<any>;
     delete_teacher(slug: string): Promise<any>;
 }

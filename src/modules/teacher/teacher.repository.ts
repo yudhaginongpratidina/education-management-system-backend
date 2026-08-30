@@ -12,9 +12,11 @@ export class TeacherRepository implements ITeacherRepository {
         address: string;
         place_and_dob: string;
         last_education: string;
+        position: string;
         photo: string;
+        still_actively_working: boolean;
     }): Promise<any> {
-        const query = `INSERT INTO teachers (full_name, slug, user_id, phone_number, address, place_and_dob, last_education, photo) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`;
+        const query = `INSERT INTO teachers (full_name, slug, user_id, phone_number, address, place_and_dob, last_education, position, photo, still_actively_working) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
         await this.db.query(query, [
             data.full_name,
             data.slug,
@@ -23,7 +25,9 @@ export class TeacherRepository implements ITeacherRepository {
             data.address,
             data.place_and_dob,
             data.last_education,
+            data.position,
             data.photo,
+            data.still_actively_working,
         ]);
         const selectQuery = `SELECT * FROM teachers WHERE slug = ? LIMIT 1;`;
         const result = await this.db.query(selectQuery, [data.slug]);
@@ -74,9 +78,11 @@ export class TeacherRepository implements ITeacherRepository {
         address: string | null;
         place_and_dob: string | null;
         last_education: string | null;
+        position: string | null;
         photo: string | null;
+        still_actively_working: boolean;
     }): Promise<any> {
-        const query = `UPDATE teachers SET full_name = ?, slug = ?, phone_number = ?, address = ?, place_and_dob = ?, last_education = ?, photo = ? WHERE id = ?;`;
+        const query = `UPDATE teachers SET full_name = ?, slug = ?, phone_number = ?, address = ?, place_and_dob = ?, last_education = ?, position = ?, photo = ?, still_actively_working = ? WHERE id = ?;`;
         await this.db.query(query, [
             data.full_name,
             data.slug,
@@ -84,7 +90,9 @@ export class TeacherRepository implements ITeacherRepository {
             data.address ?? null,
             data.place_and_dob ?? null,
             data.last_education ?? null,
+            data.position ?? null,
             data.photo ?? null,
+            data.still_actively_working,
             data.id,
         ]);
         const selectQuery = `SELECT * FROM teachers WHERE id = ? LIMIT 1;`;

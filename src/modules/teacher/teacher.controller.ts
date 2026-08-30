@@ -6,7 +6,10 @@ export class TeacherController implements ITeacherController {
 
     create_teacher = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const result = await this.teacherService.create_teacher(req.body);
+            const result = await this.teacherService.create_teacher({
+                ...req.body,
+                still_actively_working: req.body.still_actively_working ?? true,
+            });
             res.status(201).json({ success: true, message: 'Teacher created', data: result });
         } catch (error) {
             next(error);
@@ -15,8 +18,8 @@ export class TeacherController implements ITeacherController {
 
     get_teacher = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const result = await this.teacherService.get_teacher(req.query as any);
-            res.status(200).json({ success: true, message: 'Teachers fetched', data: result });
+            const result = await this.teacherService.get_teacher(req.query);
+            res.status(200).json({ success: true, message: 'Teachers retrieved', data: result });
         } catch (error) {
             next(error);
         }
@@ -37,6 +40,8 @@ export class TeacherController implements ITeacherController {
                 ...req.body,
                 id: teachers[0].id,
                 slug: req.params.slug,
+                still_actively_working:
+                    req.body.still_actively_working ?? teachers[0].still_actively_working,
             });
             res.status(200).json({ success: true, message: 'Teacher updated', data: result });
         } catch (error) {

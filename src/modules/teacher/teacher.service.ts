@@ -21,7 +21,9 @@ export class TeacherService implements ITeacherService {
         address: string;
         place_and_dob: string;
         last_education: string;
+        position: string;
         photo: string;
+        still_actively_working: boolean;
         email: string;
     }): Promise<any> {
         const slug = create_slug(data.full_name);
@@ -60,7 +62,9 @@ export class TeacherService implements ITeacherService {
         address: string | null;
         place_and_dob: string | null;
         last_education: string | null;
+        position: string | null;
         photo: string | null;
+        still_actively_working: boolean;
     }): Promise<any> {
         const slug = create_slug(data.full_name);
 

@@ -8,7 +8,9 @@ export const createTeacherSchema = z.object({
         address: z.string().optional(),
         place_and_dob: z.string().optional(),
         last_education: z.string().optional(),
+        position: z.string().optional(),
         photo: z.string().optional(),
+        still_actively_working: z.boolean().default(true),
     }),
 });
 
@@ -30,6 +32,8 @@ export const updateTeacherSchema = z.object({
         address: z.string().optional(),
         place_and_dob: z.string().optional(),
         last_education: z.string().optional(),
+        position: z.string().optional(),
         photo: z.string().optional(),
+        still_actively_working: z.boolean().default(true),
     }),
 });
