@@ -35,4 +35,18 @@ export class AuthController implements IAuthController {
             message: 'Logout successfully',
         });
     };
+
+    change_password = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        try {
+            const user_id = (req as any).user.id;
+            const { password } = req.body;
+            await this.service.change_password(user_id, password);
+            return res.status(200).json({
+                success: true,
+                message: 'Password changed successfully',
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
 }

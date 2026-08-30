@@ -1,6 +1,6 @@
 // core and shared
 import { HttpError } from '../../core/errors/http.error';
-import { compare_password } from '../../shared/libs/password';
+import { compare_password, hash_password } from '../../shared/libs/password';
 import { generate_tokens } from '../../shared/libs/jwt';
 
 // interface
@@ -47,5 +47,10 @@ export class AuthService implements IAuthService {
         const user = await this.repo.find_user_by_id(user_id);
         if (!user) throw new HttpError(404, 'User not found', 'USER_NOT_FOUND', true);
         return user;
+    }
+
+    async change_password(user_id: string, password: string): Promise<any> {
+        const password_hash = await hash_password(password);
+        return await this.repo.change_password(user_id, password_hash);
     }
 }

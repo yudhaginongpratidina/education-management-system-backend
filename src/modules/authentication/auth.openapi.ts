@@ -83,6 +83,38 @@ export const authOpenApi = {
                 },
             },
         },
+        '/auth/change-password': {
+            patch: {
+                tags: ['Authentication'],
+                summary: 'Change user password',
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/ChangePasswordRequest' },
+                        },
+                    },
+                },
+                responses: {
+                    '200': {
+                        description: 'Password changed successfully',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        success: { type: 'boolean' },
+                                        message: { type: 'string' },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    '401': { description: 'Unauthorized' },
+                },
+            },
+        },
     },
     components: {
         schemas: {
@@ -91,6 +123,13 @@ export const authOpenApi = {
                 required: ['email', 'password'],
                 properties: {
                     email: { type: 'string', format: 'email' },
+                    password: { type: 'string', format: 'password' },
+                },
+            },
+            ChangePasswordRequest: {
+                type: 'object',
+                required: ['password'],
+                properties: {
                     password: { type: 'string', format: 'password' },
                 },
             },

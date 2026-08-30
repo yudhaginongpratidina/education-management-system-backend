@@ -15,4 +15,9 @@ export class AuthRepository implements IAuthRepository {
         const result = await this.db.query(query, [user_id]);
         return result.rows[0];
     }
+
+    async change_password(user_id: string, password_hash: string): Promise<any> {
+        const query = `UPDATE users SET password_hash = ? WHERE id = ?;`;
+        return await this.db.query(query, [password_hash, user_id]);
+    }
 }
