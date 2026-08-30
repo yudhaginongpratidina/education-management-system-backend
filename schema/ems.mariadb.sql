@@ -182,3 +182,20 @@ CREATE TABLE teacher_programs (
     CONSTRAINT fk_teacher_programs_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE,
     CONSTRAINT fk_teacher_programs_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE
 )
+
+-- ============================================================
+-- TABEL STORAGE MANAGEMENT
+-- ============================================================
+CREATE TABLE storages (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    original_name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    extension VARCHAR(20) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_storages_slug (slug),
+    INDEX idx_storages_mime_type (mime_type),
+    INDEX idx_storages_created_at (created_at)
+);

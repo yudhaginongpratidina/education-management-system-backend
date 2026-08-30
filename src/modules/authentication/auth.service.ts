@@ -1,6 +1,6 @@
 // core and shared
 import { HttpError } from '../../core/errors/http.error';
-import { compare_password, hash_password } from '../../shared/libs/password';
+import { compare_password, hashing_password } from '../../shared/libs/password';
 import { generate_tokens } from '../../shared/libs/jwt';
 
 // interface
@@ -50,7 +50,7 @@ export class AuthService implements IAuthService {
     }
 
     async change_password(user_id: string, password: string): Promise<any> {
-        const password_hash = await hash_password(password);
+        const password_hash = await hashing_password(password);
         return await this.repo.change_password(user_id, password_hash);
     }
 }
