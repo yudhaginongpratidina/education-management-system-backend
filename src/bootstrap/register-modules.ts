@@ -20,10 +20,13 @@ import { programLevelModule } from '../modules/program-level-management/index';
 import { programPackageModule } from '../modules/program-package-management/index';
 
 // MODULES
+import { storageModule } from '../modules/storage/index';
+
+// MODULES
 import { teacherModule } from '../modules/teacher/index';
 import { teacherProgramModule } from '../modules/teacher-program/index';
-import { storageModule } from '../modules/storage/index';
 import { teacherAvailabilityModule } from '../modules/teacher-availability/index';
+import { teacherAttendanceModule } from '../modules/teacher-attandance/index';
 
 const modules: Module[] = [
     roleModule,
@@ -38,6 +41,7 @@ const modules: Module[] = [
     teacherProgramModule,
     storageModule,
     teacherAvailabilityModule,
+    teacherAttendanceModule,
 ];
 
 // STRATEGY CONFIG
