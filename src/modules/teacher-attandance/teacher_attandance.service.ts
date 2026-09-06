@@ -46,10 +46,15 @@ export class TeacherAttendanceService implements ITeacherAttendanceService {
             attendance_date: data.attendance_date,
         });
 
-        if (existingAttendance.length > 0) {
+        // Filter for specific branch check-in to avoid duplicate entry for same branch same day
+        const isAlreadyCheckedInAtBranch = existingAttendance.some(
+            (attendance: any) => attendance.branch_id === data.branch_id,
+        );
+
+        if (isAlreadyCheckedInAtBranch) {
             throw new HttpError(
                 400,
-                'Attendance already recorded for this teacher on this date',
+                'Attendance already recorded for this teacher on this date at this branch',
                 'ATTENDANCE_ALREADY_EXISTS',
                 true,
             );
