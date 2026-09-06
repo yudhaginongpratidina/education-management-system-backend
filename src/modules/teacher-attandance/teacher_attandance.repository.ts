@@ -7,6 +7,12 @@ const formatToMySqlDateTime = (isoString?: string | null): string | null => {
     return date.toISOString().slice(0, 19).replace('T', ' ');
 };
 
+const formatToMySqlDate = (isoString?: string | null): string | null => {
+    if (!isoString) return null;
+    const date = new Date(isoString);
+    return date.toISOString().slice(0, 10);
+};
+
 export class TeacherAttendanceRepository implements ITeacherAttendanceRepository {
     constructor(private readonly db: DatabaseClient) {}
 
@@ -42,7 +48,7 @@ export class TeacherAttendanceRepository implements ITeacherAttendanceRepository
         const values = [
             data.teacher_id,
             data.status,
-            data.attendance_date,
+            formatToMySqlDate(data.attendance_date),
             formatToMySqlDateTime(data.check_in_at),
             data.check_in_photo ?? null,
             formatToMySqlDateTime(data.check_out_at),
@@ -56,7 +62,10 @@ export class TeacherAttendanceRepository implements ITeacherAttendanceRepository
         await this.db.query(query, values);
 
         const selectQuery = `SELECT * FROM teacher_attendances WHERE teacher_id = ? AND attendance_date = ? LIMIT 1;`;
-        const result = await this.db.query(selectQuery, [data.teacher_id, data.attendance_date]);
+        const result = await this.db.query(selectQuery, [
+            data.teacher_id,
+            formatToMySqlDate(data.attendance_date),
+        ]);
         return result.rows[0];
     }
 
@@ -94,7 +103,7 @@ export class TeacherAttendanceRepository implements ITeacherAttendanceRepository
         const values = [
             data.teacher_id,
             data.status,
-            data.attendance_date,
+            formatToMySqlDate(data.attendance_date),
             formatToMySqlDateTime(data.check_in_at),
             data.check_in_photo ?? null,
             formatToMySqlDateTime(data.check_out_at),
@@ -159,5 +168,59 @@ export class TeacherAttendanceRepository implements ITeacherAttendanceRepository
     async delete_attendance(id: number): Promise<any> {
         const query = `DELETE FROM teacher_attendances WHERE id = ?;`;
         return await this.db.query(query, [id]);
+    }
+
+    async report_teacher(filter: {
+        teacher_id?: number;
+        from_date?: string;
+        to_date?: string;
+    }): Promise<any> {
+        const { teacher_id, from_date, to_date } = filter;
+
+        const detailsQuery = `
+            SELECT
+                ta.id,
+                ta.teacher_id,
+                t.full_name as teacher_name,
+                ta.attendance_date,
+                ta.check_in_at,
+                ta.check_out_at,
+                TIMEDIFF(ta.check_out_at, ta.check_in_at) as duration,
+                ta.status
+            FROM teacher_attendances ta
+            JOIN teachers t ON ta.teacher_id = t.id
+            WHERE (? IS NULL OR ta.teacher_id = ?)
+              AND ta.attendance_date >= ?
+              AND ta.attendance_date <= ?;
+        `;
+
+        const statsQuery = `
+            SELECT
+                status,
+                COUNT(*) as count
+            FROM teacher_attendances
+            WHERE (? IS NULL OR teacher_id = ?)
+              AND attendance_date >= ?
+              AND attendance_date <= ?
+            GROUP BY status;
+        `;
+
+        const details = await this.db.query(detailsQuery, [
+            teacher_id ?? null,
+            teacher_id ?? null,
+            from_date,
+            to_date,
+        ]);
+        const stats = await this.db.query(statsQuery, [
+            teacher_id ?? null,
+            teacher_id ?? null,
+            from_date,
+            to_date,
+        ]);
+
+        return {
+            details: details.rows,
+            stats: stats.rows,
+        };
     }
 }

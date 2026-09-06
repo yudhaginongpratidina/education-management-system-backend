@@ -3,10 +3,12 @@ import type {
     ITeacherAttendanceRepository,
     ITeacherAttendanceService,
 } from './teacher_attandance.interface';
+import { TeacherRepository } from '../teacher/teacher.repository';
 
 export class TeacherAttendanceService implements ITeacherAttendanceService {
     constructor(
         private repo: ITeacherAttendanceRepository,
+        private teacherRepo: TeacherRepository,
         private container: any,
     ) {}
 
@@ -32,6 +34,11 @@ export class TeacherAttendanceService implements ITeacherAttendanceService {
         check_out_longitude?: number | null;
         notes?: string | null;
     }): Promise<any> {
+        const teacher = await this.teacherRepo.get_teacher({ id: data.teacher_id });
+        if (!teacher || teacher.length === 0) {
+            throw new HttpError(404, 'Teacher not found', 'TEACHER_NOT_FOUND', true);
+        }
+
         const existingAttendance = await this.repo.get_attendance({
             teacher_id: data.teacher_id,
             attendance_date: data.attendance_date,
@@ -114,5 +121,13 @@ export class TeacherAttendanceService implements ITeacherAttendanceService {
         }
 
         return await this.repo.delete_attendance(id);
+    }
+
+    async report_teacher(filter: {
+        teacher_id?: number;
+        from_date?: string;
+        to_date?: string;
+    }): Promise<any> {
+        return await this.repo.report_teacher(filter);
     }
 }

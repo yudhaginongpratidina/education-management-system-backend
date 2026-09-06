@@ -146,6 +146,13 @@ CREATE TABLE program_packages (
 );
 
 -- ============================================================
+-- TABEL BRANCH
+-- ============================================================
+-- CREATE TABLE branch (
+--     id 
+-- )
+
+-- ============================================================
 -- TABEL GURU MANAGEMENT
 -- ============================================================
 CREATE TABLE teachers (
@@ -202,6 +209,7 @@ CREATE TABLE teacher_availability (
     INDEX idx_teacher_availability_teacher_id (teacher_id),
     CONSTRAINT fk_teacher_availability_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
 )
+
 
 -- ============================================================
 -- TEACHER ATTANDENT MANAGEMENT

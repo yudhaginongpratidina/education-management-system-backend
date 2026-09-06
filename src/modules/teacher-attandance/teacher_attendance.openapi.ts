@@ -1,5 +1,36 @@
 export const teacherAttendanceOpenApi = {
     paths: {
+        '/teacher-attendances/report': {
+            get: {
+                tags: ['Teacher Attendance Management'],
+                summary: 'Get teacher attendance report',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: 'teacher_id', in: 'query', schema: { type: 'integer' } },
+                    { name: 'month', in: 'query', required: true, schema: { type: 'integer' } },
+                    { name: 'year', in: 'query', required: true, schema: { type: 'integer' } },
+                ],
+                responses: {
+                    '200': {
+                        description: 'Attendance report fetched',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        success: { type: 'boolean' },
+                                        message: { type: 'string' },
+                                        data: {
+                                            $ref: '#/components/schemas/TeacherAttendanceReportResponse',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
         '/teacher-attendances': {
             get: {
                 tags: ['Teacher Attendance Management'],
@@ -227,6 +258,45 @@ export const teacherAttendanceOpenApi = {
                     check_out_latitude: { type: 'number', nullable: true },
                     check_out_longitude: { type: 'number', nullable: true },
                     notes: { type: 'string', nullable: true },
+                },
+            },
+            TeacherAttendanceReportResponse: {
+                type: 'object',
+                properties: {
+                    details: {
+                        type: 'array',
+                        items: {
+                            type: 'object',
+                            properties: {
+                                id: { type: 'integer' },
+                                teacher_id: { type: 'integer' },
+                                teacher_name: { type: 'string' },
+                                attendance_date: { type: 'string', format: 'date' },
+                                check_in_at: {
+                                    type: 'string',
+                                    format: 'date-time',
+                                    nullable: true,
+                                },
+                                check_out_at: {
+                                    type: 'string',
+                                    format: 'date-time',
+                                    nullable: true,
+                                },
+                                duration: { type: 'string', nullable: true },
+                                status: { type: 'string' },
+                            },
+                        },
+                    },
+                    stats: {
+                        type: 'array',
+                        items: {
+                            type: 'object',
+                            properties: {
+                                status: { type: 'string' },
+                                count: { type: 'integer' },
+                            },
+                        },
+                    },
                 },
             },
         },

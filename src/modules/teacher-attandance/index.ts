@@ -7,6 +7,7 @@ import { TeacherAttendanceRepository } from './teacher_attandance.repository';
 import { TeacherAttendanceService } from './teacher_attandance.service';
 import { TeacherAttendanceController } from './teacher_attandance.controller';
 import { TeacherAttendanceRoutes } from './teacher_attandance.route';
+import { TeacherRepository } from '../teacher/teacher.repository';
 
 export const teacherAttendanceModule: Module = {
     name: 'teacher-attandance',
@@ -14,7 +15,8 @@ export const teacherAttendanceModule: Module = {
         const database = container.db.get('main');
 
         const repository = new TeacherAttendanceRepository(database);
-        const service = new TeacherAttendanceService(repository, container);
+        const teacher_repository = new TeacherRepository(database);
+        const service = new TeacherAttendanceService(repository, teacher_repository, container);
         const controller = new TeacherAttendanceController(service);
         const routes = new TeacherAttendanceRoutes(controller);
 

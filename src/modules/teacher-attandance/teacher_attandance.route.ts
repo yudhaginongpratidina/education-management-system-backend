@@ -13,6 +13,7 @@ export class TeacherAttendanceRoutes {
         const router = Router();
 
         router.get('/', asyncHandler(this.controller.get_attendance));
+        router.get('/report', asyncHandler(this.controller.report_teacher));
         router.post(
             '/',
             validate(createAttendanceSchema),

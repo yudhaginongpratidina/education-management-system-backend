@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { HttpError } from '../../core/errors/http.error';
 import type {
     ITeacherAttendanceService,
     ITeacherAttendanceController,
@@ -41,6 +42,32 @@ export class TeacherAttendanceController implements ITeacherAttendanceController
         try {
             await this.service.delete_attendance(parseInt(req.params.id as string));
             res.status(200).json({ success: true, message: 'Attendance deleted' });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    report_teacher = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        try {
+            const { teacher_id, month, year } = req.query;
+
+            if (!month || !year) {
+                throw new HttpError(400, 'Month and Year are required', 'MISSING_PARAMETERS', true);
+            }
+
+            const from_date = `${year}-${String(month).padStart(2, '0')}-01`;
+            const to_date = new Date(Number(year), Number(month), 0).toISOString().split('T')[0];
+
+            const response = await this.service.report_teacher({
+                teacher_id: teacher_id ? parseInt(teacher_id as string) : undefined,
+                from_date,
+                to_date,
+            });
+            res.status(200).json({
+                success: true,
+                message: 'Attendance report fetched',
+                data: response,
+            });
         } catch (error) {
             next(error);
         }

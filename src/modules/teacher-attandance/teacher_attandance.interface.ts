@@ -61,6 +61,11 @@ export interface ITeacherAttendanceRepository {
         attendance_date?: string;
     }): Promise<any>;
     delete_attendance(id: number): Promise<any>;
+    report_teacher(filter: {
+        teacher_id?: number;
+        from_date?: string;
+        to_date?: string;
+    }): Promise<any>;
 }
 
 export interface ITeacherAttendanceService {
@@ -124,6 +129,11 @@ export interface ITeacherAttendanceService {
         attendance_date?: string;
     }): Promise<any>;
     delete_attendance(id: number): Promise<any>;
+    report_teacher(filter: {
+        teacher_id?: number;
+        from_date?: string;
+        to_date?: string;
+    }): Promise<any>;
 }
 
 export interface ITeacherAttendanceController {
@@ -131,4 +141,5 @@ export interface ITeacherAttendanceController {
     update_attendance(req: Request, res: Response, next: NextFunction): Promise<void>;
     get_attendance(req: Request, res: Response, next: NextFunction): Promise<void>;
     delete_attendance(req: Request, res: Response, next: NextFunction): Promise<void>;
+    report_teacher(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

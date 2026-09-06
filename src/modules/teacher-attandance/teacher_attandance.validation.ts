@@ -13,21 +13,22 @@ export const createAttendanceSchema = z.object({
             'HOLIDAY',
             'LATE',
         ]),
-        attendance_date: z
-            .string()
-            .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
+        attendance_date: z.string(), // Allow flexible formats for now, or use datetime
         check_in_at: z.string().datetime().optional().nullable(),
         check_in_photo: z.string().optional().nullable(),
         check_out_at: z.string().datetime().optional().nullable(),
         check_out_photo: z.string().optional().nullable(),
-        check_in_latitude: z.number().optional().nullable(),
-        check_in_longitude: z.number().optional().nullable(),
-        check_out_latitude: z.number().optional().nullable(),
-        check_out_longitude: z.number().optional().nullable(),
+        check_in_latitude: z.coerce.number().optional().nullable(),
+        check_in_longitude: z.coerce.number().optional().nullable(),
+        check_out_latitude: z.coerce.number().optional().nullable(),
+        check_out_longitude: z.coerce.number().optional().nullable(),
         notes: z.string().optional().nullable(),
     }),
 });
 
-export const updateAttendanceSchema = createAttendanceSchema.partial().extend({
-    id: z.number(),
+export const updateAttendanceSchema = z.object({
+    params: z.object({
+        id: z.coerce.number(),
+    }),
+    body: createAttendanceSchema.shape.body.partial(),
 });
