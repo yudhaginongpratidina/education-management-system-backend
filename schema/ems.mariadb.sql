@@ -187,7 +187,7 @@ CREATE TABLE teachers (
 )
 
 -- ============================================================
--- TABEL GURU MANAGEMENT
+-- TABEL GURU PROGRAM MANAGEMENT
 -- ============================================================
 CREATE TABLE teacher_programs (
     teacher_id BIGINT UNSIGNED NOT NULL,
