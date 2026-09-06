@@ -13,6 +13,7 @@ import { roleMenuModule } from '../modules/role-menu-management/index';
 // MODULES
 import { userModule } from '../modules/user-management/index';
 import { authModule } from '../modules/authentication/index';
+import { branchModule } from '../modules/branch-management/index';
 
 // MODULES
 import { programModule } from '../modules/program-management/index';
@@ -34,6 +35,7 @@ const modules: Module[] = [
     roleMenuModule,
     userModule,
     authModule,
+    branchModule,
     programModule,
     programLevelModule,
     programPackageModule,

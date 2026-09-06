@@ -148,9 +148,19 @@ CREATE TABLE program_packages (
 -- ============================================================
 -- TABEL BRANCH
 -- ============================================================
--- CREATE TABLE branch (
---     id 
--- )
+CREATE TABLE branches (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) NOT NULL,
+    address VARCHAR(255) NULL,
+    latitude DECIMAL(10,6) NULL,
+    longitude DECIMAL(10,6) NULL,
+    radius DECIMAL(10,6) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id)
+);
 
 -- ============================================================
 -- TABEL GURU MANAGEMENT

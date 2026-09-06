@@ -14,6 +14,9 @@ import { userOpenApi } from '../modules/user-management/user.openapi';
 import { authOpenApi } from '../modules/authentication/auth.openapi';
 
 // sub open api
+import { branchOpenApi } from '../modules/branch-management/branch.openapi';
+
+// sub open api
 import { programOpenApi } from '../modules/program-management/program.openapi';
 import { programLevelOpenApi } from '../modules/program-level-management/program-level.openapi';
 import { programPackageOpenApi } from '../modules/program-package-management/program-package.openapi';
@@ -51,6 +54,7 @@ export const setupOpenApi = (app: Express) => {
                 },
             },
             ...storageOpenApi.paths,
+            ...branchOpenApi.paths,
             ...roleOpenApi.paths,
             ...menuOpenApi.paths,
             ...roleMenuOpenApi.paths,
@@ -74,6 +78,7 @@ export const setupOpenApi = (app: Express) => {
             },
             schemas: {
                 ...storageOpenApi.components.schemas,
+                ...branchOpenApi.components.schemas,
                 ...roleOpenApi.components.schemas,
                 ...menuOpenApi.components.schemas,
                 ...roleMenuOpenApi.components.schemas,
