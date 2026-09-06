@@ -22,7 +22,14 @@ export class TeacherBranchRepository implements ITeacherBranchRepository {
 
     async get_teacher_branch(data: { teacherId: number }): Promise<any> {
         const query = `
-            SELECT tb.teacher_id, tb.branch_id, b.name as branch_name, b.slug as branch_slug
+            SELECT 
+                tb.teacher_id, 
+                tb.branch_id, 
+                b.name as branch_name, 
+                b.slug as branch_slug,
+                b.latitude,
+                b.longitude,
+                b.radius
             FROM teacher_branches tb
             JOIN branches b ON tb.branch_id = b.id
             WHERE tb.teacher_id = ?
