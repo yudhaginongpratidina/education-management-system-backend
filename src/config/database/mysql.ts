@@ -31,6 +31,7 @@ export class MysqlClient implements DatabaseClient {
             connectionLimit: config.maxConnection,
             idleTimeout: config.idleTimeout,
             connectTimeout: config.connectionTimeout,
+            timezone: 'Z',
         });
         logger.info({ db: config.name }, 'MySQL pool initialized');
     }

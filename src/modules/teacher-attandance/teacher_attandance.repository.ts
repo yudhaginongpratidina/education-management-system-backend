@@ -3,14 +3,12 @@ import type { ITeacherAttendanceRepository } from './teacher_attandance.interfac
 
 const formatToMySqlDateTime = (isoString?: string | null): string | null => {
     if (!isoString) return null;
-    const date = new Date(isoString);
-    return date.toISOString().slice(0, 19).replace('T', ' ');
+    return isoString.replace('T', ' ').replace('Z', '');
 };
 
 const formatToMySqlDate = (isoString?: string | null): string | null => {
     if (!isoString) return null;
-    const date = new Date(isoString);
-    return date.toISOString().slice(0, 10);
+    return isoString.split('T')[0];
 };
 
 export class TeacherAttendanceRepository implements ITeacherAttendanceRepository {
