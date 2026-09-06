@@ -220,6 +220,18 @@ CREATE TABLE teacher_availability (
     CONSTRAINT fk_teacher_availability_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
 )
 
+-- ============================================================
+-- TABEL GURU ASSIGNMENT BRANCH MANAGEMENT
+-- ============================================================
+CREATE TABLE teacher_branches (
+    teacher_id BIGINT UNSIGNED NOT NULL,
+    branch_id BIGINT UNSIGNED NOT NULL,
+    UNIQUE KEY uq_teacher_branches_teacher_branch (teacher_id, branch_id),
+    INDEX idx_teacher_branches_teacher_id (teacher_id),
+    INDEX idx_teacher_branches_branch_id (branch_id),
+    CONSTRAINT fk_teacher_branches_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE,
+    CONSTRAINT fk_teacher_branches_branch FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
+)
 
 -- ============================================================
 -- TEACHER ATTANDENT MANAGEMENT

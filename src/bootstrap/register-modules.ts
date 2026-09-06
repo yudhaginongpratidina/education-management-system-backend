@@ -27,6 +27,7 @@ import { storageModule } from '../modules/storage/index';
 import { teacherModule } from '../modules/teacher/index';
 import { teacherProgramModule } from '../modules/teacher-program/index';
 import { teacherAvailabilityModule } from '../modules/teacher-availability/index';
+import { teacherBranchModule } from '../modules/teacher-branch-management/index';
 import { teacherAttendanceModule } from '../modules/teacher-attandance/index';
 
 const modules: Module[] = [
@@ -42,6 +43,7 @@ const modules: Module[] = [
     teacherModule,
     teacherProgramModule,
     storageModule,
+    teacherBranchModule,
     teacherAvailabilityModule,
     teacherAttendanceModule,
 ];
