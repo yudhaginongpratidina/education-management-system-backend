@@ -10,7 +10,12 @@ export class TeacherAttendanceController implements ITeacherAttendanceController
 
     create_attendance = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
         try {
-            const response = await this.service.create_attendance(req.body);
+            const data = {
+                ...req.body,
+                branch_id: parseInt(req.body.branch_id),
+                is_approved: req.body.is_approved === 'true' || req.body.is_approved === true,
+            };
+            const response = await this.service.create_attendance(data);
             res.status(201).json({ success: true, message: 'Attendance recorded', data: response });
         } catch (error) {
             next(error);
@@ -19,10 +24,13 @@ export class TeacherAttendanceController implements ITeacherAttendanceController
 
     update_attendance = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
         try {
-            const response = await this.service.update_attendance({
+            const data = {
                 ...req.body,
                 id: parseInt(req.params.id as string),
-            });
+                branch_id: parseInt(req.body.branch_id),
+                is_approved: req.body.is_approved === 'true' || req.body.is_approved === true,
+            };
+            const response = await this.service.update_attendance(data);
             res.status(200).json({ success: true, message: 'Attendance updated', data: response });
         } catch (error) {
             next(error);

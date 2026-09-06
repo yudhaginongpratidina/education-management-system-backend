@@ -14,6 +14,7 @@ export class TeacherAttendanceService implements ITeacherAttendanceService {
 
     async create_attendance(data: {
         teacher_id: number;
+        branch_id: number;
         status:
             | 'PRESENT'
             | 'ABSENT'
@@ -33,6 +34,7 @@ export class TeacherAttendanceService implements ITeacherAttendanceService {
         check_out_latitude?: number | null;
         check_out_longitude?: number | null;
         notes?: string | null;
+        is_approved?: boolean;
     }): Promise<any> {
         const teacher = await this.teacherRepo.get_teacher({ id: data.teacher_id });
         if (!teacher || teacher.length === 0) {
@@ -59,6 +61,7 @@ export class TeacherAttendanceService implements ITeacherAttendanceService {
     async update_attendance(data: {
         id: number;
         teacher_id: number;
+        branch_id: number;
         status:
             | 'PRESENT'
             | 'ABSENT'
@@ -78,6 +81,7 @@ export class TeacherAttendanceService implements ITeacherAttendanceService {
         check_out_latitude?: number | null;
         check_out_longitude?: number | null;
         notes?: string | null;
+        is_approved?: boolean;
     }): Promise<any> {
         const existingAttendance = await this.repo.get_attendance({ id: data.id });
 

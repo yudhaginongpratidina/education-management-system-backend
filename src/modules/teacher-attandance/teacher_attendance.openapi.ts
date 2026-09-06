@@ -174,6 +174,11 @@ export const teacherAttendanceOpenApi = {
                 properties: {
                     id: { type: 'integer' },
                     teacher_id: { type: 'integer' },
+                    branch_id: { type: 'integer' },
+                    teacher_name: { type: 'string' },
+                    teacher_slug: { type: 'string' },
+                    branch_name: { type: 'string' },
+                    branch_slug: { type: 'string' },
                     status: {
                         type: 'string',
                         enum: [
@@ -197,15 +202,17 @@ export const teacherAttendanceOpenApi = {
                     check_out_latitude: { type: 'number', nullable: true },
                     check_out_longitude: { type: 'number', nullable: true },
                     notes: { type: 'string', nullable: true },
+                    is_approved: { type: 'boolean' },
                     created_at: { type: 'string', format: 'date-time' },
                     updated_at: { type: 'string', format: 'date-time' },
                 },
             },
             CreateTeacherAttendanceRequest: {
                 type: 'object',
-                required: ['teacher_id', 'status', 'attendance_date'],
+                required: ['teacher_id', 'branch_id', 'status', 'attendance_date'],
                 properties: {
                     teacher_id: { type: 'integer' },
+                    branch_id: { type: 'integer' },
                     status: {
                         type: 'string',
                         enum: [
@@ -229,12 +236,14 @@ export const teacherAttendanceOpenApi = {
                     check_out_latitude: { type: 'number', nullable: true },
                     check_out_longitude: { type: 'number', nullable: true },
                     notes: { type: 'string', nullable: true },
+                    is_approved: { type: 'boolean' },
                 },
             },
             UpdateTeacherAttendanceRequest: {
                 type: 'object',
                 properties: {
                     teacher_id: { type: 'integer' },
+                    branch_id: { type: 'integer' },
                     status: {
                         type: 'string',
                         enum: [
@@ -258,6 +267,7 @@ export const teacherAttendanceOpenApi = {
                     check_out_latitude: { type: 'number', nullable: true },
                     check_out_longitude: { type: 'number', nullable: true },
                     notes: { type: 'string', nullable: true },
+                    is_approved: { type: 'boolean' },
                 },
             },
             TeacherAttendanceReportResponse: {
@@ -270,7 +280,11 @@ export const teacherAttendanceOpenApi = {
                             properties: {
                                 id: { type: 'integer' },
                                 teacher_id: { type: 'integer' },
+                                branch_id: { type: 'integer' },
                                 teacher_name: { type: 'string' },
+                                teacher_slug: { type: 'string' },
+                                branch_name: { type: 'string' },
+                                branch_slug: { type: 'string' },
                                 attendance_date: { type: 'string', format: 'date' },
                                 check_in_at: {
                                     type: 'string',

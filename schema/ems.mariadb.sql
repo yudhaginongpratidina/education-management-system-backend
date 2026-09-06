@@ -239,6 +239,7 @@ CREATE TABLE teacher_branches (
 CREATE TABLE teacher_attendances (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     teacher_id BIGINT UNSIGNED NOT NULL,
+    branch_id BIGINT UNSIGNED NOT NULL,
     status ENUM(
         'PRESENT',
         'ABSENT',
@@ -259,6 +260,7 @@ CREATE TABLE teacher_attendances (
     check_out_latitude DECIMAL(10,8) NULL,
     check_out_longitude DECIMAL(11,8) NULL,
     notes VARCHAR(255) NULL,
+    is_approved BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
@@ -268,6 +270,10 @@ CREATE TABLE teacher_attendances (
     CONSTRAINT fk_attendances_teacher
         FOREIGN KEY (teacher_id)
         REFERENCES teachers(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_attendances_branch
+        FOREIGN KEY (branch_id)
+        REFERENCES branches(id)
         ON DELETE CASCADE
 );
 

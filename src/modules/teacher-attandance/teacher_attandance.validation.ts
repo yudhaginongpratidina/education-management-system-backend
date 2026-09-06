@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const createAttendanceSchema = z.object({
     body: z.object({
         teacher_id: z.number(),
+        branch_id: z.number(),
         status: z.enum([
             'PRESENT',
             'ABSENT',
@@ -23,6 +24,7 @@ export const createAttendanceSchema = z.object({
         check_out_latitude: z.coerce.number().optional().nullable(),
         check_out_longitude: z.coerce.number().optional().nullable(),
         notes: z.string().optional().nullable(),
+        is_approved: z.boolean().optional(),
     }),
 });
 

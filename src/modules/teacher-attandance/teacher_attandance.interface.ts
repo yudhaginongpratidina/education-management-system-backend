@@ -3,6 +3,7 @@ import type { Request, Response, NextFunction } from 'express';
 export interface ITeacherAttendanceRepository {
     create_attendance(data: {
         teacher_id: number;
+        branch_id: number;
         status:
             | 'PRESENT'
             | 'ABSENT'
@@ -22,10 +23,12 @@ export interface ITeacherAttendanceRepository {
         check_out_latitude?: number | null;
         check_out_longitude?: number | null;
         notes?: string | null;
+        is_approved?: boolean;
     }): Promise<any>;
     update_attendance(data: {
         id: number;
         teacher_id: number;
+        branch_id: number;
         status:
             | 'PRESENT'
             | 'ABSENT'
@@ -45,6 +48,7 @@ export interface ITeacherAttendanceRepository {
         check_out_latitude?: number | null;
         check_out_longitude?: number | null;
         notes?: string | null;
+        is_approved?: boolean;
     }): Promise<any>;
     get_attendance(filter: {
         id?: number;
@@ -71,6 +75,7 @@ export interface ITeacherAttendanceRepository {
 export interface ITeacherAttendanceService {
     create_attendance(data: {
         teacher_id: number;
+        branch_id: number;
         status:
             | 'PRESENT'
             | 'ABSENT'
@@ -90,10 +95,12 @@ export interface ITeacherAttendanceService {
         check_out_latitude?: number | null;
         check_out_longitude?: number | null;
         notes?: string | null;
+        is_approved?: boolean;
     }): Promise<any>;
     update_attendance(data: {
         id: number;
         teacher_id: number;
+        branch_id: number;
         status:
             | 'PRESENT'
             | 'ABSENT'
@@ -113,6 +120,7 @@ export interface ITeacherAttendanceService {
         check_out_latitude?: number | null;
         check_out_longitude?: number | null;
         notes?: string | null;
+        is_approved?: boolean;
     }): Promise<any>;
     get_attendance(filter: {
         id?: number;
