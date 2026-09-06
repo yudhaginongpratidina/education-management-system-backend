@@ -264,7 +264,7 @@ CREATE TABLE teacher_attendances (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_attendances_teacher_date (teacher_id, attendance_date),
+    UNIQUE KEY uq_attendances_teacher_branch_date (teacher_id, branch_id, attendance_date),
     INDEX idx_attendances_teacher_id (teacher_id),
     INDEX idx_attendances_date (attendance_date),
     CONSTRAINT fk_attendances_teacher
