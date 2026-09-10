@@ -29,6 +29,7 @@ import { teacherProgramModule } from '../modules/teacher-program/index';
 import { teacherAvailabilityModule } from '../modules/teacher-availability/index';
 import { teacherBranchModule } from '../modules/teacher-branch-management/index';
 import { teacherAttendanceModule } from '../modules/teacher-attandance/index';
+import { attendanceApproveModule } from '../modules/attendance-approve/index';
 
 const modules: Module[] = [
     roleModule,
@@ -46,6 +47,7 @@ const modules: Module[] = [
     teacherBranchModule,
     teacherAvailabilityModule,
     teacherAttendanceModule,
+    attendanceApproveModule,
 ];
 
 // STRATEGY CONFIG
