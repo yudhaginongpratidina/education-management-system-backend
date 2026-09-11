@@ -23,6 +23,19 @@ export class StorageRoutes {
         );
 
         router.get(
+            '/backup',
+            // authMiddleware,
+            asyncHandler(this.controller.backup),
+        );
+
+        router.post(
+            '/restore',
+            // authMiddleware,
+            upload.single('zipFile'),
+            asyncHandler(this.controller.restore),
+        );
+
+        router.get(
             '/:slug',
             // authMiddleware,
             validate(getStorageSchema),

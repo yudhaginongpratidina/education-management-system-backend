@@ -25,6 +25,8 @@ export interface IStorageService {
     upload(file: Express.Multer.File): Promise<IStorage>;
     get(slug: string): Promise<IStorage>;
     delete(slug: string): Promise<void>;
+    backup(): Promise<string>; // Mengembalikan path file zip
+    restore(zipFile: Express.Multer.File): Promise<void>;
 }
 
 export interface IStorageController {

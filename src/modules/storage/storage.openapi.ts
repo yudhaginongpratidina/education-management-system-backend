@@ -34,6 +34,48 @@ export const storageOpenApi = {
                 },
             },
         },
+        '/storage/backup': {
+            get: {
+                tags: ['Storage Management'],
+                summary: 'Backup uploads folder',
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    '200': {
+                        description: 'Download backup zip file',
+                        content: {
+                            'application/zip': {},
+                        },
+                    },
+                },
+            },
+        },
+        '/storage/restore': {
+            post: {
+                tags: ['Storage Management'],
+                summary: 'Restore uploads from zip',
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'multipart/form-data': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    zipFile: {
+                                        type: 'string',
+                                        format: 'binary',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                responses: {
+                    '200': { description: 'Backup restored successfully' },
+                    '400': { description: 'Bad Request' },
+                },
+            },
+        },
         '/storage/{slug}': {
             get: {
                 tags: ['Storage Management'],
