@@ -70,5 +70,57 @@ export const reportAttendanceOpenApi = {
                 },
             },
         },
+        '/report-attendance/export/branch/{branch_id}': {
+            get: {
+                tags: ['Report Attendance'],
+                summary: 'Export attendance report to Excel by branch ID',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: 'branch_id', in: 'path', required: true, schema: { type: 'integer' } },
+                    {
+                        name: 'month',
+                        in: 'query',
+                        required: false,
+                        schema: { type: 'string', pattern: '^\\d{4}-\\d{2}$' },
+                        description: 'Format: YYYY-MM',
+                    },
+                ],
+                responses: {
+                    '200': {
+                        description: 'Excel file',
+                        content: {
+                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {},
+                        },
+                    },
+                    '401': { description: 'Unauthorized' },
+                },
+            },
+        },
+        '/report-attendance/export/teacher/{teacher_id}': {
+            get: {
+                tags: ['Report Attendance'],
+                summary: 'Export attendance report to Excel by teacher ID',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: 'teacher_id', in: 'path', required: true, schema: { type: 'integer' } },
+                    {
+                        name: 'month',
+                        in: 'query',
+                        required: false,
+                        schema: { type: 'string', pattern: '^\\d{4}-\\d{2}$' },
+                        description: 'Format: YYYY-MM',
+                    },
+                ],
+                responses: {
+                    '200': {
+                        description: 'Excel file',
+                        content: {
+                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {},
+                        },
+                    },
+                    '401': { description: 'Unauthorized' },
+                },
+            },
+        },
     },
 };

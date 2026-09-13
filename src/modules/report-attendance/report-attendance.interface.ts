@@ -8,9 +8,21 @@ export interface IReportAttendanceRepository {
 export interface IReportAttendanceService {
     report_attendance_by_branch_id(branch_id: number, month?: string): Promise<any>;
     report_attendance_by_teacher_id(teacher_id: number, month?: string): Promise<any>;
+    export_report_attendance_by_branch_id(branch_id: number, month?: string): Promise<any>;
+    export_report_attendance_by_teacher_id(teacher_id: number, month?: string): Promise<any>;
 }
 
 export interface IReportAttendanceController {
     report_attendance_by_branch_id(req: Request, res: Response, next: NextFunction): Promise<void>;
     report_attendance_by_teacher_id(req: Request, res: Response, next: NextFunction): Promise<void>;
+    export_report_attendance_by_branch_id(
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<void>;
+    export_report_attendance_by_teacher_id(
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<void>;
 }

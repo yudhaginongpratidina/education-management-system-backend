@@ -26,6 +26,18 @@ export class ReportAttendanceRoutes {
             validate(reportAttendanceByTeacherIdSchema),
             asyncHandler(this.controller.report_attendance_by_teacher_id),
         );
+        router.get(
+            '/export/branch/:branch_id',
+            authMiddleware,
+            validate(reportAttendanceByBranchIdSchema),
+            asyncHandler(this.controller.export_report_attendance_by_branch_id),
+        );
+        router.get(
+            '/export/teacher/:teacher_id',
+            authMiddleware,
+            validate(reportAttendanceByTeacherIdSchema),
+            asyncHandler(this.controller.export_report_attendance_by_teacher_id),
+        );
         return router;
     }
 }

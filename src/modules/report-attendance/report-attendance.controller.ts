@@ -42,4 +42,58 @@ export class ReportAttendanceController implements IReportAttendanceController {
             next(error);
         }
     };
+
+    export_report_attendance_by_branch_id = async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<void> => {
+        try {
+            const { branch_id } = req.params;
+            const { month } = req.query;
+            const buffer = await this.service.export_report_attendance_by_branch_id(
+                Number(branch_id),
+                month as string,
+            );
+
+            res.setHeader(
+                'Content-Type',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            );
+            res.setHeader(
+                'Content-Disposition',
+                `attachment; filename=attendance_branch_${branch_id}.xlsx`,
+            );
+            res.send(buffer);
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    export_report_attendance_by_teacher_id = async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<void> => {
+        try {
+            const { teacher_id } = req.params;
+            const { month } = req.query;
+            const buffer = await this.service.export_report_attendance_by_teacher_id(
+                Number(teacher_id),
+                month as string,
+            );
+
+            res.setHeader(
+                'Content-Type',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            );
+            res.setHeader(
+                'Content-Disposition',
+                `attachment; filename=attendance_teacher_${teacher_id}.xlsx`,
+            );
+            res.send(buffer);
+        } catch (error) {
+            next(error);
+        }
+    };
 }
