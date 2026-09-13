@@ -28,6 +28,7 @@ import { teacherBranchOpenApi } from '../modules/teacher-branch-management/teach
 import { teacherAttendanceOpenApi } from '../modules/teacher-attandance/teacher_attendance.openapi';
 import { attendanceApproveOpenApi } from '../modules/attendance-approve/attendance-approve.openapi';
 import { teacherAvailabilityOpenApi } from '../modules/teacher-availability/teacher-availability.openapi';
+import { reportAttendanceOpenApi } from '../modules/report-attendance/report-attendance.openapi';
 
 export const setupOpenApi = (app: Express) => {
     const openApiSpecification = {
@@ -71,6 +72,7 @@ export const setupOpenApi = (app: Express) => {
             ...teacherBranchOpenApi.paths,
             ...teacherAttendanceOpenApi.paths,
             ...attendanceApproveOpenApi.paths,
+            ...reportAttendanceOpenApi.paths,
         },
         components: {
             securitySchemes: {
