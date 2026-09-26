@@ -21,7 +21,11 @@ export class TeacherProgramService implements ITeacherProgramService {
         return await this.repo.bulk_create_teacher_program(data);
     }
 
-    async get_teacher_programs(filter: { teacher_id?: number; program_id?: number }): Promise<any> {
+    async get_teacher_programs(filter: {
+        teacher_id?: number;
+        program_id?: number;
+        branch_id?: number;
+    }): Promise<any> {
         return await this.repo.get_teacher_programs(filter);
     }
 

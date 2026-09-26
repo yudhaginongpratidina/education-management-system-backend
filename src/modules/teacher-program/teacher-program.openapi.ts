@@ -4,9 +4,18 @@ export const teacherProgramOpenApi = {
             get: {
                 tags: ['Teacher-Program'],
                 summary: 'Get teacher-programs',
+                description:
+                    'Returns teacher-program mappings. Each item includes the branches the teacher is assigned to.',
                 parameters: [
                     { name: 'teacher_id', in: 'query', schema: { type: 'integer' } },
                     { name: 'program_id', in: 'query', schema: { type: 'integer' } },
+                    {
+                        name: 'branch_id',
+                        in: 'query',
+                        required: false,
+                        description: 'Filter to mappings whose teacher is assigned to this branch',
+                        schema: { type: 'integer' },
+                    },
                 ],
                 responses: {
                     '200': {
@@ -85,6 +94,19 @@ export const teacherProgramOpenApi = {
                     teacher_slug: { type: 'string' },
                     program_name: { type: 'string' },
                     program_slug: { type: 'string' },
+                    branches: {
+                        type: 'array',
+                        description: 'Branches the teacher is assigned to',
+                        items: { $ref: '#/components/schemas/TeacherBranch' },
+                    },
+                },
+            },
+            TeacherBranch: {
+                type: 'object',
+                properties: {
+                    branch_id: { type: 'integer' },
+                    branch_name: { type: 'string' },
+                    branch_slug: { type: 'string' },
                 },
             },
         },

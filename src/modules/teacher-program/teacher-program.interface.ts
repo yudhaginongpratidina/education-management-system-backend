@@ -7,7 +7,11 @@ export interface ITeacherProgramRepository {
             program_id: number;
         }[],
     ): Promise<any>;
-    get_teacher_programs(filter: { teacher_id?: number; program_id?: number }): Promise<any>;
+    get_teacher_programs(filter: {
+        teacher_id?: number;
+        program_id?: number;
+        branch_id?: number;
+    }): Promise<any>;
     delete_teacher_program(data: { teacher_id: number; program_id: number }): Promise<any>;
 }
 
@@ -18,7 +22,11 @@ export interface ITeacherProgramService {
             program_id: number;
         }[],
     ): Promise<any>;
-    get_teacher_programs(filter: { teacher_id?: number; program_id?: number }): Promise<any>;
+    get_teacher_programs(filter: {
+        teacher_id?: number;
+        program_id?: number;
+        branch_id?: number;
+    }): Promise<any>;
     delete_teacher_program(data: { teacher_id: number; program_id: number }): Promise<any>;
 }
 

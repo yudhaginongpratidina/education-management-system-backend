@@ -30,10 +30,11 @@ export class TeacherProgramController implements ITeacherProgramController {
         next: NextFunction,
     ): Promise<any> => {
         try {
-            const { teacher_id, program_id } = req.query;
-            const filter: { teacher_id?: number; program_id?: number } = {};
+            const { teacher_id, program_id, branch_id } = req.query;
+            const filter: { teacher_id?: number; program_id?: number; branch_id?: number } = {};
             if (teacher_id) filter.teacher_id = parseInt(teacher_id as string);
             if (program_id) filter.program_id = parseInt(program_id as string);
+            if (branch_id) filter.branch_id = parseInt(branch_id as string);
 
             const response = await this.service.get_teacher_programs(filter);
             res.status(200).json({

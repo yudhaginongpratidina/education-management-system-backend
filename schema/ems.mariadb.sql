@@ -378,3 +378,177 @@ CREATE TABLE storages (
     INDEX idx_storages_mime_type (mime_type),
     INDEX idx_storages_created_at (created_at)
 );
+
+
+-- ============================================================
+-- KELOMPOK BELAJAR
+-- ============================================================
+CREATE TABLE classes (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    branch_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    code VARCHAR(100) NOT NULL,
+    description VARCHAR(255) NULL,
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_classes_code (code),
+    INDEX idx_classes_branch_id (branch_id),
+    CONSTRAINT fk_classes_branch
+        FOREIGN KEY (branch_id)
+        REFERENCES branches(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+);
+
+-- ============================================================
+-- SISWA YANG MASUK KE DALAM KELAS TERSEBUT
+-- ============================================================
+CREATE TABLE class_students (
+    class_id BIGINT UNSIGNED NOT NULL,
+    student_program_id BIGINT UNSIGNED NOT NULL,
+    joined_at DATE NOT NULL,
+    left_at DATE NULL,
+    PRIMARY KEY (class_id, student_program_id),
+    INDEX idx_class_students_student_program (student_program_id),
+    CONSTRAINT fk_class_students_class
+        FOREIGN KEY (class_id)
+        REFERENCES classes(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_class_students_student_program
+        FOREIGN KEY (student_program_id)
+        REFERENCES student_programs(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+);
+
+-- ============================================================
+-- GURU UTAMA & GURU YANG DIPERBOLEHKAN MENJADI PENGGANTI
+-- ============================================================
+CREATE TABLE class_teachers (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    class_id BIGINT UNSIGNED NOT NULL,
+    teacher_id BIGINT UNSIGNED NOT NULL,
+    role ENUM('PRIMARY', 'SUBSTITUTE') NOT NULL DEFAULT 'PRIMARY',
+    started_at DATE NOT NULL,
+    ended_at DATE NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_class_teachers (class_id, teacher_id, role, started_at),
+    INDEX idx_class_teachers_class (class_id),
+    INDEX idx_class_teachers_teacher (teacher_id),
+    CONSTRAINT fk_class_teachers_class
+        FOREIGN KEY (class_id)
+        REFERENCES classes(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_class_teachers_teacher
+        FOREIGN KEY (teacher_id)
+        REFERENCES teachers(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+);
+
+
+-- ============================================================
+-- TEMPLATE JADWAL MINGGUAN
+-- ============================================================
+CREATE TABLE class_schedules (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    class_id BIGINT UNSIGNED NOT NULL,
+    day_of_week TINYINT UNSIGNED NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    effective_from DATE NOT NULL,
+    effective_until DATE NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    INDEX idx_class_schedules_class (class_id),
+    INDEX idx_class_schedules_day_time (day_of_week, start_time, end_time),
+    CONSTRAINT fk_class_schedules_class
+        FOREIGN KEY (class_id)
+        REFERENCES classes(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT chk_class_schedules_day
+        CHECK (day_of_week BETWEEN 1 AND 7),
+    CONSTRAINT chk_class_schedules_time
+        CHECK (end_time > start_time)
+);
+
+
+-- ===========================================================
+-- GURU AKTUAL YANG MENGAJAR PADA SESI TERSEBUT
+-- ===========================================================
+CREATE TABLE class_sessions (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    class_id BIGINT UNSIGNED NOT NULL,
+    scheduled_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    teacher_id BIGINT UNSIGNED NOT NULL,
+    status ENUM(
+        'SCHEDULED',
+        'ONGOING',
+        'COMPLETED',
+        'CANCELLED',
+        'RESCHEDULED'
+    ) NOT NULL DEFAULT 'SCHEDULED',
+    notes VARCHAR(500) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    INDEX idx_class_sessions_class_date
+        (class_id, scheduled_date),
+    INDEX idx_class_sessions_teacher_date
+        (teacher_id, scheduled_date),
+    INDEX idx_class_sessions_date_time
+        (scheduled_date, start_time, end_time),
+    CONSTRAINT fk_class_sessions_class
+        FOREIGN KEY (class_id)
+        REFERENCES classes(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_class_sessions_teacher
+        FOREIGN KEY (teacher_id)
+        REFERENCES teachers(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT chk_class_sessions_time
+        CHECK (end_time > start_time)
+);
+
+-- ===========================================================
+-- PESERTA SESI
+-- ===========================================================
+CREATE TABLE class_session_students (
+    session_id BIGINT UNSIGNED NOT NULL,
+    student_program_id BIGINT UNSIGNED NOT NULL,
+    attendance_status ENUM(
+        'PRESENT',
+        'ABSENT',
+        'SICK',
+        'PERMISSION',
+        'RESCHEDULED'
+    ) NOT NULL DEFAULT 'ABSENT',
+    notes VARCHAR(500) NULL,
+    PRIMARY KEY (session_id, student_program_id),
+    INDEX idx_session_students_student
+        (student_program_id),
+    CONSTRAINT fk_session_students_session
+        FOREIGN KEY (session_id)
+        REFERENCES class_sessions(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_session_students_student
+        FOREIGN KEY (student_program_id)
+        REFERENCES student_programs(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+);

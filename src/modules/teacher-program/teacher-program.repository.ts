@@ -23,7 +23,11 @@ export class TeacherProgramRepository implements ITeacherProgramRepository {
         return { success: true };
     }
 
-    async get_teacher_programs(filter: { teacher_id?: number; program_id?: number }): Promise<any> {
+    async get_teacher_programs(filter: {
+        teacher_id?: number;
+        program_id?: number;
+        branch_id?: number;
+    }): Promise<any> {
         const conditions: string[] = [];
         const values: unknown[] = [];
 
@@ -34,6 +38,12 @@ export class TeacherProgramRepository implements ITeacherProgramRepository {
         if (filter.program_id !== undefined) {
             conditions.push('tp.program_id = ?');
             values.push(filter.program_id);
+        }
+        if (filter.branch_id !== undefined) {
+            conditions.push(
+                'EXISTS (SELECT 1 FROM teacher_branches tb WHERE tb.teacher_id = tp.teacher_id AND tb.branch_id = ?)',
+            );
+            values.push(filter.branch_id);
         }
 
         let query = `
@@ -54,7 +64,41 @@ export class TeacherProgramRepository implements ITeacherProgramRepository {
         }
 
         const response = await this.db.query(query, values);
-        return response.rows;
+        const rows = response.rows;
+
+        // Attach the branches each teacher is assigned to (teacher_branches).
+        const teacherIds = [...new Set(rows.map((row: any) => row.teacher_id))] as number[];
+        if (teacherIds.length === 0) return rows;
+
+        const placeholders = teacherIds.map(() => '?').join(', ');
+        const branchQuery = `
+            SELECT
+                tb.teacher_id,
+                tb.branch_id,
+                b.name as branch_name,
+                b.slug as branch_slug
+            FROM teacher_branches tb
+            JOIN branches b ON tb.branch_id = b.id
+            WHERE tb.teacher_id IN (${placeholders})
+            ORDER BY b.name ASC
+        `;
+        const branchResult = await this.db.query(branchQuery, teacherIds);
+
+        const branchesByTeacher = new Map<number, any[]>();
+        for (const branch of branchResult.rows) {
+            const list = branchesByTeacher.get(branch.teacher_id) ?? [];
+            list.push({
+                branch_id: branch.branch_id,
+                branch_name: branch.branch_name,
+                branch_slug: branch.branch_slug,
+            });
+            branchesByTeacher.set(branch.teacher_id, list);
+        }
+
+        return rows.map((row: any) => ({
+            ...row,
+            branches: branchesByTeacher.get(row.teacher_id) ?? [],
+        }));
     }
 
     async delete_teacher_program(data: { teacher_id: number; program_id: number }): Promise<any> {
