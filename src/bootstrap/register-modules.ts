@@ -34,6 +34,11 @@ import { reportAttendanceModule } from '../modules/report-attendance/index';
 import { dashboardModule } from '../modules/dashboard/index';
 import { studentModule } from '../modules/student/index';
 import { studentProgramModule } from '../modules/student-program/index';
+import { classManagementModule } from '../modules/class-management/index';
+import { classStudentModule } from '../modules/class-student/index';
+import { classTeacherModule } from '../modules/class-teacher/index';
+import { classScheduleModule } from '../modules/class-schedule/index';
+import { classSessionModule } from '../modules/class-session/index';
 
 const modules: Module[] = [
     roleModule,
@@ -56,6 +61,11 @@ const modules: Module[] = [
     dashboardModule,
     studentModule,
     studentProgramModule,
+    classManagementModule,
+    classStudentModule,
+    classTeacherModule,
+    classScheduleModule,
+    classSessionModule,
 ];
 
 // STRATEGY CONFIG

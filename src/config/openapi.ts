@@ -34,6 +34,12 @@ import { dashboardOpenApi } from '../modules/dashboard/dashboard.openapi';
 // sub open api
 import { studentOpenApi } from '../modules/student/student.openapi';
 import { studentProgramOpenApi } from '../modules/student-program/student-program.openapi';
+import { classOpenApiParameters, classOpenApiSchemas } from '../shared/class/class.openapi';
+import { classOpenApi } from '../modules/class-management/class.openapi';
+import { classStudentOpenApi } from '../modules/class-student/class-student.openapi';
+import { classTeacherOpenApi } from '../modules/class-teacher/class-teacher.openapi';
+import { classScheduleOpenApi } from '../modules/class-schedule/class-schedule.openapi';
+import { classSessionOpenApi } from '../modules/class-session/class-session.openapi';
 
 export const setupOpenApi = (app: Express) => {
     const openApiSpecification = {
@@ -81,6 +87,11 @@ export const setupOpenApi = (app: Express) => {
             ...dashboardOpenApi.paths,
             ...studentOpenApi.paths,
             ...studentProgramOpenApi.paths,
+            ...classOpenApi.paths,
+            ...classStudentOpenApi.paths,
+            ...classTeacherOpenApi.paths,
+            ...classScheduleOpenApi.paths,
+            ...classSessionOpenApi.paths,
         },
         components: {
             securitySchemes: {
@@ -89,6 +100,14 @@ export const setupOpenApi = (app: Express) => {
                     scheme: 'bearer',
                     bearerFormat: 'JWT',
                 },
+            },
+            parameters: {
+                ...classOpenApiParameters,
+                ...classOpenApi.components.parameters,
+                ...classStudentOpenApi.components.parameters,
+                ...classTeacherOpenApi.components.parameters,
+                ...classScheduleOpenApi.components.parameters,
+                ...classSessionOpenApi.components.parameters,
             },
             schemas: {
                 ...storageOpenApi.components.schemas,
@@ -110,6 +129,12 @@ export const setupOpenApi = (app: Express) => {
                 ...reportAttendanceOpenApi.components.schemas,
                 ...studentOpenApi.components.schemas,
                 ...studentProgramOpenApi.components.schemas,
+                ...classOpenApiSchemas,
+                ...classOpenApi.components.schemas,
+                ...classStudentOpenApi.components.schemas,
+                ...classTeacherOpenApi.components.schemas,
+                ...classScheduleOpenApi.components.schemas,
+                ...classSessionOpenApi.components.schemas,
             },
         },
     };
