@@ -13,6 +13,12 @@ import type {
 } from './types';
 import { logger } from '../logger';
 
+// mysql2 rejects `undefined` bind values. Omitted optional fields should be
+// sent as SQL NULL instead of throwing a "Bind parameters must not contain
+// undefined" error.
+const normalizeParams = (params?: any[]): any[] | undefined =>
+    params?.map((value) => (value === undefined ? null : value));
+
 export class MysqlClient implements DatabaseClient {
     private pool: Pool;
     private config: BaseDatabaseConfig;
@@ -47,7 +53,7 @@ export class MysqlClient implements DatabaseClient {
         try {
             const [rows] = await this.pool.execute<(T[] & RowDataPacket[][]) | ResultSetHeader>(
                 text,
-                params,
+                normalizeParams(params),
             );
 
             // mysql2 returns an array where the first element is the result.
@@ -78,7 +84,7 @@ export class MysqlClient implements DatabaseClient {
             ): Promise<QueryResult<T>> => {
                 const [rows] = await connection.execute<
                     (T[] & RowDataPacket[][]) | ResultSetHeader
-                >(text, params);
+                >(text, normalizeParams(params));
                 const isArray = Array.isArray(rows);
                 return {
                     rows: isArray ? (rows as T[]) : ([] as T[]),

@@ -41,11 +41,11 @@ export class StudentProgramRepository implements IStudentProgramRepository {
             data.program_package_id,
             data.program_level_id,
             data.status,
-            data.started_at,
-            data.ended_at,
+            data.started_at ?? null,
+            data.ended_at ?? null,
             data.normal_price,
             data.selling_price,
-            data.notes,
+            data.notes ?? null,
         ]);
 
         const selectQuery = `SELECT * FROM student_programs WHERE id = LAST_INSERT_ID();`;
