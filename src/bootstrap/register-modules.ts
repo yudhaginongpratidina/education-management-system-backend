@@ -32,6 +32,8 @@ import { teacherAttendanceModule } from '../modules/teacher-attandance/index';
 import { attendanceApproveModule } from '../modules/attendance-approve/index';
 import { reportAttendanceModule } from '../modules/report-attendance/index';
 import { dashboardModule } from '../modules/dashboard/index';
+import { studentModule } from '../modules/student/index';
+import { studentProgramModule } from '../modules/student-program/index';
 
 const modules: Module[] = [
     roleModule,
@@ -52,6 +54,8 @@ const modules: Module[] = [
     attendanceApproveModule,
     reportAttendanceModule,
     dashboardModule,
+    studentModule,
+    studentProgramModule,
 ];
 
 // STRATEGY CONFIG

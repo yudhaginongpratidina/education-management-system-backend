@@ -277,6 +277,91 @@ CREATE TABLE teacher_attendances (
         ON DELETE CASCADE
 );
 
+
+-- ============================================================
+-- TABEL STUDENT MANAGEMENT
+-- ============================================================
+-- ============================================================
+-- STUDENT MANAGEMENT
+-- ============================================================
+CREATE TABLE students (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    full_name VARCHAR(150) NOT NULL,
+    address VARCHAR(255) NULL,
+    place_birth VARCHAR(100) NULL,
+    birth_date DATE NULL,
+    school_level VARCHAR(100) NULL,
+    father_name VARCHAR(150) NULL,
+    mother_name VARCHAR(150) NULL,
+    guardian_name VARCHAR(150) NULL,
+    guardian_phone_number VARCHAR(30) NULL,
+    instagram VARCHAR(100) NULL,
+    information_source VARCHAR(100) NULL,
+    photos_of_children_may_be_posted BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    INDEX idx_students_full_name (full_name),
+    INDEX idx_students_birth_date (birth_date),
+    INDEX idx_students_school_level (school_level),
+    INDEX idx_students_guardian_phone (guardian_phone_number)
+);
+
+
+-- ============================================================
+-- STUDENT PROGRAM / ENROLLMENT MANAGEMENT
+-- ============================================================
+CREATE TABLE student_programs (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    student_id BIGINT UNSIGNED NOT NULL,
+    branch_id BIGINT UNSIGNED NOT NULL,
+    program_package_id BIGINT UNSIGNED NOT NULL,
+    program_level_id BIGINT UNSIGNED NOT NULL,
+    status ENUM(
+        'PENDING',
+        'TRIAL',
+        'ACTIVE',
+        'COMPLETED',
+        'CANCELLED',
+        'EXPIRED'
+    ) NOT NULL DEFAULT 'PENDING',
+    started_at DATE NULL,
+    ended_at DATE NULL,
+    normal_price DECIMAL(12,2) NOT NULL DEFAULT 0,
+    selling_price DECIMAL(12,2) NOT NULL DEFAULT 0,
+    notes VARCHAR(255) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    INDEX idx_student_programs_student_id (student_id),
+    INDEX idx_student_programs_branch_id (branch_id),
+    INDEX idx_student_programs_program_package_id (program_package_id),
+    INDEX idx_student_programs_program_level_id (program_level_id),
+    INDEX idx_student_programs_status (status),
+    CONSTRAINT fk_student_programs_student
+        FOREIGN KEY (student_id)
+        REFERENCES students(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_student_programs_branch
+        FOREIGN KEY (branch_id)
+        REFERENCES branches(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_student_programs_program_package
+        FOREIGN KEY (program_package_id)
+        REFERENCES program_packages(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_student_programs_program_level
+        FOREIGN KEY (program_level_id)
+        REFERENCES program_levels(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+);
+
 -- ============================================================
 -- TABEL STORAGE MANAGEMENT
 -- ============================================================

@@ -31,6 +31,10 @@ import { teacherAvailabilityOpenApi } from '../modules/teacher-availability/teac
 import { reportAttendanceOpenApi } from '../modules/report-attendance/report-attendance.openapi';
 import { dashboardOpenApi } from '../modules/dashboard/dashboard.openapi';
 
+// sub open api
+import { studentOpenApi } from '../modules/student/student.openapi';
+import { studentProgramOpenApi } from '../modules/student-program/student-program.openapi';
+
 export const setupOpenApi = (app: Express) => {
     const openApiSpecification = {
         openapi: '3.0.0',
@@ -75,6 +79,8 @@ export const setupOpenApi = (app: Express) => {
             ...attendanceApproveOpenApi.paths,
             ...reportAttendanceOpenApi.paths,
             ...dashboardOpenApi.paths,
+            ...studentOpenApi.paths,
+            ...studentProgramOpenApi.paths,
         },
         components: {
             securitySchemes: {
@@ -101,6 +107,9 @@ export const setupOpenApi = (app: Express) => {
                 ...teacherBranchOpenApi.components.schemas,
                 ...teacherAttendanceOpenApi.components.schemas,
                 ...attendanceApproveOpenApi.components.schemas,
+                ...reportAttendanceOpenApi.components.schemas,
+                ...studentOpenApi.components.schemas,
+                ...studentProgramOpenApi.components.schemas,
             },
         },
     };

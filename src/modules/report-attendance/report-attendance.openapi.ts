@@ -123,4 +123,7 @@ export const reportAttendanceOpenApi = {
             },
         },
     },
+    components: {
+        schemas: {},
+    },
 };
