@@ -121,6 +121,54 @@ export const classSessionOpenApi = {
                 },
             },
         },
+        '/classes/{classId}/sessions/bulk': {
+            post: {
+                tags: ['Class Sessions'],
+                summary: 'Create many sessions at once (multiple dates x time slots)',
+                description:
+                    'Expands the cartesian product of `dates` and `time_slots`, checks class, teacher and student schedule conflicts for every candidate, then creates the sessions with the given participants. With `skip_conflicts` (default true) only conflicting candidates are reported in `skipped`; when false the first conflict aborts the whole batch.',
+                security: [{ bearerAuth: [] }],
+                parameters: [{ $ref: '#/components/parameters/ClassIdParam' }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/BulkCreateSessionsRequest' },
+                            example: {
+                                teacher_id: 5,
+                                dates: ['2026-10-05', '2026-10-07', '2026-10-12'],
+                                time_slots: [{ start_time: '09:00', end_time: '10:00' }],
+                                student_program_ids: [10, 11, 12],
+                                notes: 'Paket Oktober',
+                                skip_conflicts: true,
+                            },
+                        },
+                    },
+                },
+                responses: {
+                    '201': {
+                        description: 'Bulk creation finished',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        success: { type: 'boolean' },
+                                        message: { type: 'string' },
+                                        data: {
+                                            $ref: '#/components/schemas/BulkCreateSessionsResult',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    ...classAuthErrors,
+                    '404': { description: 'CLASS_NOT_FOUND' },
+                    '409': { description: 'CLASS_NOT_ACTIVE' },
+                },
+            },
+        },
         '/classes/{classId}/sessions/{id}': {
             get: {
                 tags: ['Class Sessions'],
@@ -505,6 +553,44 @@ export const classSessionOpenApi = {
                 },
             },
         },
+        '/sessions/{sessionId}/students/{studentProgramId}/reschedule': {
+            post: {
+                tags: ['Student Reschedule'],
+                summary: 'Reschedule a single student to another session',
+                description:
+                    'Moves a student to a make-up session. The target must be open, the student must be an active member of the target class, and the target date must fall inside the package-driven enrollment period.',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { $ref: '#/components/parameters/SessionIdParam' },
+                    { $ref: '#/components/parameters/StudentProgramIdParam' },
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                required: ['target_session_id'],
+                                properties: {
+                                    target_session_id: { type: 'integer', example: 210 },
+                                    reason: { type: 'string', nullable: true },
+                                },
+                            },
+                            example: { target_session_id: 210, reason: 'Siswa sakit' },
+                        },
+                    },
+                },
+                responses: {
+                    '200': { description: 'Student rescheduled' },
+                    ...classAuthErrors,
+                    '404': { description: 'TARGET_SESSION_NOT_FOUND / STUDENT_PROGRAM_NOT_FOUND' },
+                    '409': {
+                        description:
+                            'ENROLLMENT_WINDOW_EXCEEDED / DUPLICATE_SESSION_STUDENT / INVALID_SESSION_STATUS_TRANSITION',
+                    },
+                },
+            },
+        },
         '/sessions/{sessionId}/attendance': {
             patch: {
                 tags: ['Student Attendance'],
@@ -619,6 +705,71 @@ export const classSessionOpenApi = {
                 properties: {
                     teacher_id: { type: 'integer', example: 25 },
                     notes: { type: 'string', nullable: true },
+                },
+            },
+            BulkCreateSessionsRequest: {
+                type: 'object',
+                required: ['teacher_id', 'dates', 'time_slots'],
+                properties: {
+                    teacher_id: { type: 'integer', example: 5 },
+                    dates: {
+                        type: 'array',
+                        minItems: 1,
+                        items: { type: 'string', format: 'date' },
+                        example: ['2026-10-05', '2026-10-07'],
+                    },
+                    time_slots: {
+                        type: 'array',
+                        minItems: 1,
+                        items: {
+                            type: 'object',
+                            required: ['start_time', 'end_time'],
+                            properties: {
+                                start_time: { type: 'string', example: '09:00' },
+                                end_time: { type: 'string', example: '10:00' },
+                            },
+                        },
+                    },
+                    student_program_ids: {
+                        type: 'array',
+                        items: { type: 'integer' },
+                        example: [10, 11],
+                    },
+                    status: { $ref: '#/components/schemas/SessionStatus' },
+                    notes: { type: 'string', nullable: true },
+                    skip_conflicts: {
+                        type: 'boolean',
+                        default: true,
+                        description: 'Skip conflicting candidates instead of aborting the batch.',
+                    },
+                },
+            },
+            BulkCreateSessionsResult: {
+                type: 'object',
+                properties: {
+                    total_requested: { type: 'integer', example: 3 },
+                    created_count: { type: 'integer', example: 2 },
+                    skipped_count: { type: 'integer', example: 1 },
+                    created: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/ClassSession' },
+                    },
+                    skipped: {
+                        type: 'array',
+                        items: {
+                            type: 'object',
+                            properties: {
+                                scheduled_date: { type: 'string', format: 'date' },
+                                start_time: { type: 'string' },
+                                end_time: { type: 'string' },
+                                code: {
+                                    type: 'string',
+                                    example: 'TEACHER_SCHEDULE_CONFLICT',
+                                },
+                                reason: { type: 'string' },
+                            },
+                        },
+                    },
                 },
             },
             SessionStudent: {

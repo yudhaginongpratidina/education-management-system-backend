@@ -6,11 +6,13 @@ import {
     addSessionStudentSchema,
     attendanceSchema,
     bulkAttendanceSchema,
+    bulkCreateSessionsSchema,
     calendarQuerySchema,
     createClassSessionSchema,
     generateSessionsSchema,
     listSessionSchema,
     rescheduleSessionSchema,
+    rescheduleStudentSchema,
     sessionIdParamsSchema,
     sessionParamsSchema,
     sessionStudentParamsSchema,
@@ -31,6 +33,7 @@ export class SessionRoutes {
         router.use(authMiddleware);
 
         // ---------- class sessions (nested under a class) ----------
+        router.get('/:classId/student-quotas', asyncHandler(this.controller.getClassStudentQuotas));
         router.get(
             '/:classId/sessions',
             validate(listSessionSchema),
@@ -45,6 +48,11 @@ export class SessionRoutes {
             '/:classId/sessions/generate',
             validate(generateSessionsSchema),
             asyncHandler(this.controller.generateSessions),
+        );
+        router.post(
+            '/:classId/sessions/bulk',
+            validate(bulkCreateSessionsSchema),
+            asyncHandler(this.controller.bulkCreateSessions),
         );
         router.get(
             '/:classId/sessions/:id',
@@ -133,6 +141,13 @@ export class SessionRoutes {
             '/:sessionId/attendance',
             validate(bulkAttendanceSchema),
             asyncHandler(this.controller.bulkUpdateAttendance),
+        );
+
+        // ---------- student reschedule ----------
+        router.post(
+            '/:sessionId/students/:studentProgramId/reschedule',
+            validate(rescheduleStudentSchema),
+            asyncHandler(this.controller.rescheduleStudent),
         );
 
         return router;

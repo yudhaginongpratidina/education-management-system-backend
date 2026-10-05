@@ -30,4 +30,10 @@ export class StudentProgramController {
         await this.service.delete(Number(req.params.id));
         res.status(204).send();
     };
+
+    getSummary = async (req: Request, res: Response) => {
+        const summary = await this.service.getSummary(Number(req.params.id));
+        if (!summary) return res.status(404).json({ message: 'Not found' });
+        res.json({ success: true, data: summary });
+    };
 }

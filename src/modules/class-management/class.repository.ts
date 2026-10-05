@@ -7,16 +7,35 @@ const SORTABLE_COLUMNS = new Set(['name', 'code', 'status', 'created_at', 'updat
 export class ClassRepository implements IClassRepository {
     constructor(private readonly db: DatabaseClient) {}
 
+    private readonly baseSelect = `
+        SELECT
+            c.*,
+            b.name AS branch_name,
+            p.name AS program_name,
+            pl.name AS program_level_name
+        FROM classes c
+        LEFT JOIN branches b ON c.branch_id = b.id
+        LEFT JOIN programs p ON c.program_id = p.id
+        LEFT JOIN program_levels pl ON c.program_level_id = pl.id
+    `;
+
     async create(data: {
         branch_id: number;
+        program_id?: number | null;
+        program_level_id?: number | null;
         name: string;
         code: string;
         description?: string | null;
         status?: 'ACTIVE' | 'INACTIVE';
     }): Promise<any> {
-        const query = `INSERT INTO classes (branch_id, name, code, description, status) VALUES (?, ?, ?, ?, ?);`;
+        const query = `
+            INSERT INTO classes (branch_id, program_id, program_level_id, name, code, description, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+        `;
         await this.db.query(query, [
             data.branch_id,
+            data.program_id ?? null,
+            data.program_level_id ?? null,
             data.name,
             data.code,
             data.description ?? null,
@@ -32,20 +51,24 @@ export class ClassRepository implements IClassRepository {
         const values: unknown[] = [];
 
         if (filter.branch_id !== undefined) {
-            conditions.push('branch_id = ?');
+            conditions.push('c.branch_id = ?');
             values.push(filter.branch_id);
         }
+        if (filter.program_id !== undefined) {
+            conditions.push('c.program_id = ?');
+            values.push(filter.program_id);
+        }
         if (filter.status !== undefined) {
-            conditions.push('status = ?');
+            conditions.push('c.status = ?');
             values.push(filter.status);
         }
         if (filter.search) {
-            conditions.push('(name LIKE ? OR code LIKE ?)');
+            conditions.push('(c.name LIKE ? OR c.code LIKE ?)');
             const like = `%${filter.search}%`;
             values.push(like, like);
         }
 
-        let query = `SELECT * FROM classes`;
+        let query = this.baseSelect;
         if (conditions.length > 0) {
             query += ` WHERE ${conditions.join(' AND ')}`;
         }
@@ -53,7 +76,7 @@ export class ClassRepository implements IClassRepository {
         const sortBy =
             filter.sort_by && SORTABLE_COLUMNS.has(filter.sort_by) ? filter.sort_by : 'created_at';
         const sortOrder = (filter.sort_order ?? 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-        query += ` ORDER BY ${sortBy} ${sortOrder}`;
+        query += ` ORDER BY c.${sortBy} ${sortOrder}`;
 
         if (pagination) {
             query += ` LIMIT ? OFFSET ?`;
@@ -65,7 +88,7 @@ export class ClassRepository implements IClassRepository {
     }
 
     async findById(id: number): Promise<any> {
-        const result = await this.db.query(`SELECT * FROM classes WHERE id = ? LIMIT 1;`, [id]);
+        const result = await this.db.query(`${this.baseSelect} WHERE c.id = ? LIMIT 1;`, [id]);
         return result.rows[0] ?? null;
     }
 

@@ -4,7 +4,12 @@ import type { ClassSessionStatus, Pagination, QueryExecutor } from '../../shared
 import type { ISessionConflictService } from '../../shared/class/schedule-conflict.service';
 import type { IClassRepository } from '../class-management/class.interface';
 import type { IClassTeacherRepository } from '../class-teacher/class-teacher.interface';
-import { isDuplicateEntryError, normalizeTime } from '../../shared/class/class.util';
+import { isDuplicateEntryError, normalizeTime, toDateOnly } from '../../shared/class/class.util';
+import {
+    assertQuotaAvailable,
+    assertWithinEnrollmentWindow,
+} from '../../shared/class/enrollment-quota.util';
+import type { ISessionRescheduleRepository } from '../session-reschedule/session-reschedule.interface';
 import type {
     IClassSessionRepository,
     IClassSessionService,
@@ -28,6 +33,7 @@ export class ClassSessionService implements IClassSessionService {
         private readonly sessionStudentRepository: IClassSessionStudentRepository,
         private readonly conflictService: ISessionConflictService,
         private readonly db: DatabaseClient,
+        private readonly rescheduleRepository?: ISessionRescheduleRepository,
     ) {}
 
     private async getClassOrFail(classId: number): Promise<any> {
@@ -132,6 +138,12 @@ export class ClassSessionService implements IClassSessionService {
                 true,
             );
         }
+
+        // Package-driven eligibility: inside the enrollment period and within
+        // the session quota (RESCHEDULED rows do not count).
+        assertWithinEnrollmentWindow(studentProgram, toDateOnly(session.scheduled_date) as string);
+        const quotaUsage = await this.sessionStudentRepository.getQuotaUsage(studentProgramId);
+        assertQuotaAvailable(studentProgram, quotaUsage);
 
         await this.conflictService.checkStudentSessionConflict(
             studentProgramId,
@@ -250,6 +262,201 @@ export class ClassSessionService implements IClassSessionService {
 
             return session;
         });
+    }
+
+    /**
+     * Validate a participant for the bulk flow WITHOUT writing anything, so a
+     * whole (date x time-slot) candidate can be rejected before any insert.
+     */
+    private async validateBulkParticipant(
+        classId: number,
+        branchId: number,
+        studentProgramId: number,
+        date: string,
+        startTime: string,
+        endTime: string,
+        executor?: QueryExecutor,
+    ): Promise<void> {
+        const studentProgram =
+            await this.sessionStudentRepository.getStudentProgram(studentProgramId);
+        if (!studentProgram) {
+            throw new HttpError(
+                404,
+                'Student program not found',
+                'STUDENT_PROGRAM_NOT_FOUND',
+                true,
+            );
+        }
+
+        if (Number(studentProgram.branch_id) !== Number(branchId)) {
+            throw new HttpError(
+                400,
+                'Student program branch does not match class branch',
+                'STUDENT_BRANCH_MISMATCH',
+                true,
+            );
+        }
+
+        const isMember = await this.sessionStudentRepository.isMemberOfClass(
+            classId,
+            studentProgramId,
+        );
+        if (!isMember) {
+            throw new HttpError(
+                400,
+                'Student is not an active member of this class',
+                'STUDENT_NOT_IN_CLASS',
+                true,
+            );
+        }
+
+        assertWithinEnrollmentWindow(studentProgram, date);
+        const quotaUsage = await this.sessionStudentRepository.getQuotaUsage(studentProgramId);
+        assertQuotaAvailable(studentProgram, quotaUsage);
+
+        await this.conflictService.checkStudentSessionConflict(
+            studentProgramId,
+            date,
+            startTime,
+            endTime,
+            undefined,
+            executor,
+        );
+    }
+
+    /**
+     * Create many sessions at once from the cartesian product of `dates` and
+     * `time_slots`. Every candidate is conflict-checked (class, teacher and each
+     * student) before it is inserted.
+     *
+     * With `skip_conflicts` (default true) conflicting candidates are reported in
+     * `skipped` and the rest are still created. When false, the first conflict
+     * aborts the whole batch.
+     */
+    async bulkCreateSessions(classId: number, data: any): Promise<any> {
+        const klass = await this.getClassOrFail(classId);
+        if (klass.status !== 'ACTIVE') {
+            throw new HttpError(409, 'Class is not active', 'CLASS_NOT_ACTIVE', true);
+        }
+
+        const dates = [...new Set<string>(data.dates)].sort();
+        const slots = (data.time_slots as any[]).map((slot) => ({
+            start_time: normalizeTime(slot.start_time) as string,
+            end_time: normalizeTime(slot.end_time) as string,
+        }));
+        const studentProgramIds = [...new Set<number>(data.student_program_ids ?? [])];
+        const status: ClassSessionStatus = data.status ?? 'SCHEDULED';
+        const skipConflicts = data.skip_conflicts !== false;
+
+        if (dates.length * slots.length > 200) {
+            throw new HttpError(
+                400,
+                'Too many sessions requested at once (maximum 200)',
+                'TOO_MANY_SESSIONS',
+                true,
+            );
+        }
+
+        const created: any[] = [];
+        const skipped: any[] = [];
+
+        await this.db.transaction!(async (tx) => {
+            for (const date of dates) {
+                for (const slot of slots) {
+                    try {
+                        await this.validateTeacherEligibility(
+                            classId,
+                            klass.branch_id,
+                            data.teacher_id,
+                            date,
+                            tx,
+                        );
+                        await this.conflictService.checkClassSessionConflict(
+                            classId,
+                            date,
+                            slot.start_time,
+                            slot.end_time,
+                            undefined,
+                            tx,
+                        );
+                        await this.conflictService.checkTeacherSessionConflict(
+                            data.teacher_id,
+                            date,
+                            slot.start_time,
+                            slot.end_time,
+                            undefined,
+                            tx,
+                        );
+
+                        for (const studentProgramId of studentProgramIds) {
+                            await this.validateBulkParticipant(
+                                classId,
+                                klass.branch_id,
+                                studentProgramId,
+                                date,
+                                slot.start_time,
+                                slot.end_time,
+                                tx,
+                            );
+                        }
+                    } catch (error) {
+                        if (
+                            skipConflicts &&
+                            error instanceof HttpError &&
+                            [400, 404, 409].includes(error.status)
+                        ) {
+                            skipped.push({
+                                scheduled_date: date,
+                                start_time: slot.start_time,
+                                end_time: slot.end_time,
+                                code: error.code,
+                                reason: error.message,
+                            });
+                            continue;
+                        }
+                        throw error;
+                    }
+
+                    const session = await this.repository.create(
+                        {
+                            class_id: classId,
+                            scheduled_date: date,
+                            start_time: slot.start_time,
+                            end_time: slot.end_time,
+                            teacher_id: data.teacher_id,
+                            status,
+                            notes: data.notes ?? null,
+                        },
+                        tx,
+                    );
+
+                    for (const studentProgramId of studentProgramIds) {
+                        await this.sessionStudentRepository.create(
+                            {
+                                session_id: session.id,
+                                student_program_id: studentProgramId,
+                                attendance_status: 'ABSENT',
+                                notes: null,
+                            },
+                            tx,
+                        );
+                    }
+
+                    created.push({
+                        ...session,
+                        participant_count: studentProgramIds.length,
+                    });
+                }
+            }
+        });
+
+        return {
+            total_requested: dates.length * slots.length,
+            created_count: created.length,
+            skipped_count: skipped.length,
+            created,
+            skipped,
+        };
     }
 
     async updateSession(id: number, data: any): Promise<any> {
@@ -388,6 +595,39 @@ export class ClassSessionService implements IClassSessionService {
             );
 
             const participants = await this.sessionStudentRepository.findBySession(id);
+
+            // The new date must still fall inside each student's enrollment period
+            // (package-driven). `force: true` lets an admin override intentionally.
+            const outsideWindow: any[] = [];
+            for (const participant of participants) {
+                const enrollment = await this.sessionStudentRepository.getStudentProgram(
+                    participant.student_program_id,
+                );
+                const startedAt = toDateOnly(enrollment?.started_at);
+                const endedAt = toDateOnly(enrollment?.ended_at);
+                if (
+                    (startedAt && data.scheduled_date < startedAt) ||
+                    (endedAt && data.scheduled_date > endedAt)
+                ) {
+                    outsideWindow.push({
+                        student_program_id: participant.student_program_id,
+                        student_name: participant.student_name,
+                        started_at: startedAt,
+                        ended_at: endedAt,
+                    });
+                }
+            }
+
+            if (outsideWindow.length > 0 && !data.force) {
+                throw new HttpError(
+                    409,
+                    'New date is outside some students enrollment period',
+                    'ENROLLMENT_WINDOW_EXCEEDED',
+                    true,
+                    outsideWindow,
+                );
+            }
+
             for (const participant of participants) {
                 await this.conflictService.checkStudentSessionConflict(
                     participant.student_program_id,
@@ -426,6 +666,20 @@ export class ClassSessionService implements IClassSessionService {
                         student_program_id: participant.student_program_id,
                         attendance_status: 'ABSENT',
                         notes: null,
+                    },
+                    tx,
+                );
+            }
+
+            if (this.rescheduleRepository) {
+                await this.rescheduleRepository.create(
+                    {
+                        type: 'SESSION',
+                        class_id: existing.class_id,
+                        from_session_id: id,
+                        to_session_id: created.id,
+                        reason: data.notes ?? null,
+                        created_by: data.created_by ?? null,
                     },
                     tx,
                 );
@@ -497,11 +751,28 @@ export class ClassSessionService implements IClassSessionService {
                 tx,
             );
 
-            return await this.repository.update(
+            const updated = await this.repository.update(
                 id,
                 { teacher_id: data.teacher_id, notes: data.notes ?? existing.notes },
                 tx,
             );
+
+            if (this.rescheduleRepository) {
+                await this.rescheduleRepository.create(
+                    {
+                        type: 'TEACHER',
+                        class_id: klass.id,
+                        from_session_id: id,
+                        from_teacher_id: existing.teacher_id,
+                        to_teacher_id: data.teacher_id,
+                        reason: data.notes ?? null,
+                        created_by: (data as any).created_by ?? null,
+                    },
+                    tx,
+                );
+            }
+
+            return updated;
         });
     }
 

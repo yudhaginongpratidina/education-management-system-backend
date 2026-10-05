@@ -110,7 +110,9 @@ export class ClassSessionStudentRepository implements IClassSessionStudentReposi
 
     async getStudentProgram(studentProgramId: number): Promise<any> {
         const result = await this.db.query(
-            `SELECT id, student_id, branch_id, status FROM student_programs WHERE id = ? LIMIT 1;`,
+            `SELECT id, student_id, branch_id, status, started_at, ended_at,
+                    total_sessions, sessions_per_period, session_period
+             FROM student_programs WHERE id = ? LIMIT 1;`,
             [studentProgramId],
         );
         return result.rows[0] ?? null;
@@ -154,6 +156,57 @@ export class ClassSessionStudentRepository implements IClassSessionStudentReposi
             FOR UPDATE
         `;
         const result = await this.executor(executor).query(query, values);
+        return result.rows;
+    }
+
+    // Number of sessions already consumed by an enrollment. Rows flagged
+    // RESCHEDULED are excluded so a make-up does not double-count the quota.
+    async getQuotaUsage(studentProgramId: number): Promise<any> {
+        const result = await this.db.query(
+            `SELECT
+                COUNT(*) AS total_rows,
+                COALESCE(SUM(CASE WHEN attendance_status <> 'RESCHEDULED' THEN 1 ELSE 0 END), 0) AS used,
+                COALESCE(SUM(CASE WHEN attendance_status = 'RESCHEDULED' THEN 1 ELSE 0 END), 0) AS rescheduled
+             FROM class_session_students
+             WHERE student_program_id = ?;`,
+            [studentProgramId],
+        );
+        return result.rows[0] ?? { total_rows: 0, used: 0, rescheduled: 0 };
+    }
+
+    // Active members of a class together with their enrollment quota usage.
+    async findClassMembersWithQuota(classId: number): Promise<any> {
+        const result = await this.db.query(
+            `SELECT
+                cs.student_program_id,
+                sp.student_id,
+                s.full_name AS student_name,
+                sp.branch_id,
+                bs.name AS branch_name,
+                pp.name AS package_name,
+                pl.name AS level_name,
+                sp.status AS enrollment_status,
+                sp.started_at,
+                sp.ended_at,
+                sp.total_sessions,
+                sp.sessions_per_period,
+                sp.session_period,
+                COALESCE(SUM(CASE WHEN css.attendance_status <> 'RESCHEDULED' THEN 1 ELSE 0 END), 0) AS used,
+                COALESCE(SUM(CASE WHEN css.attendance_status = 'RESCHEDULED' THEN 1 ELSE 0 END), 0) AS rescheduled
+             FROM class_students cs
+             JOIN student_programs sp ON cs.student_program_id = sp.id
+             JOIN students s ON sp.student_id = s.id
+             LEFT JOIN branches bs ON sp.branch_id = bs.id
+             LEFT JOIN program_packages pp ON sp.program_package_id = pp.id
+             LEFT JOIN program_levels pl ON sp.program_level_id = pl.id
+             LEFT JOIN class_session_students css ON css.student_program_id = sp.id
+             WHERE cs.class_id = ? AND cs.left_at IS NULL
+             GROUP BY cs.student_program_id, sp.student_id, s.full_name, sp.branch_id, bs.name,
+                      pp.name, pl.name, sp.status, sp.started_at, sp.ended_at, sp.total_sessions,
+                      sp.sessions_per_period, sp.session_period
+             ORDER BY s.full_name ASC;`,
+            [classId],
+        );
         return result.rows;
     }
 }

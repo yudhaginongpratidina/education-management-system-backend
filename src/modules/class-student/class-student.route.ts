@@ -23,6 +23,11 @@ export class ClassStudentRoutes {
             validate(classIdParamsSchema),
             asyncHandler(this.controller.getClassStudents),
         );
+        router.get(
+            '/:classId/eligible-students',
+            validate(classIdParamsSchema),
+            asyncHandler(this.controller.getEligibleStudents),
+        );
         router.post(
             '/:classId/students',
             validate(addClassStudentSchema),

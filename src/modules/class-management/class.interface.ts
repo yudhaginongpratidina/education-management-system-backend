@@ -3,6 +3,7 @@ import type { ClassStatus, Pagination } from '../../shared/class/class.types';
 
 export interface ClassListFilter {
     branch_id?: number;
+    program_id?: number;
     status?: ClassStatus;
     search?: string;
     sort_by?: string;
@@ -15,6 +16,8 @@ export interface ClassListFilter {
 export interface IClassRepository {
     create(data: {
         branch_id: number;
+        program_id?: number | null;
+        program_level_id?: number | null;
         name: string;
         code: string;
         description?: string | null;
@@ -27,6 +30,8 @@ export interface IClassRepository {
         id: number,
         data: {
             branch_id?: number;
+            program_id?: number | null;
+            program_level_id?: number | null;
             name?: string;
             code?: string;
             description?: string | null;
@@ -40,6 +45,8 @@ export interface IClassRepository {
 export interface IClassService {
     createClass(data: {
         branch_id: number;
+        program_id?: number | null;
+        program_level_id?: number | null;
         name: string;
         code: string;
         description?: string | null;

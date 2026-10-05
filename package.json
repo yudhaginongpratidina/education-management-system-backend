@@ -7,6 +7,7 @@
         "build": "bun build ./src/server.ts --target=node --outdir ./dist --minify && javascript-obfuscator dist --output dist",
         "dev": "bun --watch ./src/server.ts",
         "start": "bun ./dist/server.js",
+        "migrate": "bun ./scripts/migrate.ts",
         "format": "prettier . --write",
         "format:check": "prettier . --check"
     },

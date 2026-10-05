@@ -17,6 +17,23 @@ export class ClassStudentController implements IClassStudentController {
         }
     };
 
+    getEligibleStudents = async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<void> => {
+        try {
+            const response = await this.service.getEligibleStudents(Number(req.params.classId));
+            res.status(200).json({
+                success: true,
+                message: 'Eligible students fetched',
+                data: response,
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
     addClassStudent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const response = await this.service.addClassStudent(

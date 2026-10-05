@@ -10,6 +10,11 @@ export interface StudentProgram {
     normal_price: number;
     selling_price: number;
     notes?: string;
+    // Snapshot of the chosen package terms (drives scheduling & reschedule).
+    duration_months?: number | null;
+    sessions_per_period?: number | null;
+    session_period?: 'WEEK' | 'MONTH' | 'DURATION' | null;
+    total_sessions?: number | null;
     created_at: Date;
     updated_at: Date;
 
@@ -51,4 +56,6 @@ export interface IStudentProgramRepository {
         >,
     ): Promise<StudentProgram | null>;
     delete(id: number): Promise<void>;
+    getPackage(packageId: number): Promise<any | null>;
+    getSessionUsage(studentProgramId: number): Promise<any>;
 }

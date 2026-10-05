@@ -12,6 +12,7 @@ export class StudentProgramRoutes {
     router(): Router {
         const router = Router();
         router.get('/', this.controller.findAll);
+        router.get('/:id/summary', this.controller.getSummary);
         router.get('/:id', this.controller.findById);
         router.post('/', validate(createStudentProgramSchema), this.controller.create);
         router.put('/:id', validate(updateStudentProgramSchema), this.controller.update);

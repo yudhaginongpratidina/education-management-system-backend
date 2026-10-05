@@ -8,6 +8,7 @@ export class DashboardRoutes {
 
     router() {
         const router = Router();
+        router.get('/overview', authMiddleware, asyncHandler(this.controller.get_overview));
         router.get('/total-branch', authMiddleware, asyncHandler(this.controller.get_total_branch));
         router.get(
             '/total-teacher',

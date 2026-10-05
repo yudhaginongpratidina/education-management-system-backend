@@ -5,6 +5,7 @@ import { SessionConflictService } from '../../shared/class/schedule-conflict.ser
 import { ClassRepository } from '../class-management/class.repository';
 import { ClassTeacherRepository } from '../class-teacher/class-teacher.repository';
 import { ClassScheduleRepository } from '../class-schedule/class-schedule.repository';
+import { SessionRescheduleRepository } from '../session-reschedule/session-reschedule.repository';
 
 import { ClassSessionRepository } from './class-session.repository';
 import { ClassSessionService } from './class-session.service';
@@ -26,6 +27,7 @@ export const classSessionModule: Module = {
         const classScheduleRepository = new ClassScheduleRepository(database);
         const classSessionRepository = new ClassSessionRepository(database);
         const classSessionStudentRepository = new ClassSessionStudentRepository(database);
+        const sessionRescheduleRepository = new SessionRescheduleRepository(database);
 
         // shared conflict detection
         const conflictService = new SessionConflictService(
@@ -41,12 +43,14 @@ export const classSessionModule: Module = {
             classSessionStudentRepository,
             conflictService,
             database,
+            sessionRescheduleRepository,
         );
         const classSessionStudentService = new ClassSessionStudentService(
             classSessionStudentRepository,
             classSessionRepository,
             conflictService,
             database,
+            sessionRescheduleRepository,
         );
         const sessionGenerationService = new SessionGenerationService(
             classRepository,

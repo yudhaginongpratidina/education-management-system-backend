@@ -331,6 +331,10 @@ CREATE TABLE student_programs (
     normal_price DECIMAL(12,2) NOT NULL DEFAULT 0,
     selling_price DECIMAL(12,2) NOT NULL DEFAULT 0,
     notes VARCHAR(255) NULL,
+    duration_months INT NULL,
+    sessions_per_period INT NULL,
+    session_period ENUM('WEEK', 'MONTH', 'DURATION') NULL,
+    total_sessions INT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
@@ -386,6 +390,8 @@ CREATE TABLE storages (
 CREATE TABLE classes (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     branch_id BIGINT UNSIGNED NOT NULL,
+    program_id BIGINT UNSIGNED NULL,
+    program_level_id BIGINT UNSIGNED NULL,
     name VARCHAR(100) NOT NULL,
     code VARCHAR(100) NOT NULL,
     description VARCHAR(255) NULL,
@@ -395,10 +401,21 @@ CREATE TABLE classes (
     PRIMARY KEY (id),
     UNIQUE KEY uq_classes_code (code),
     INDEX idx_classes_branch_id (branch_id),
+    INDEX idx_classes_program_id (program_id),
     CONSTRAINT fk_classes_branch
         FOREIGN KEY (branch_id)
         REFERENCES branches(id)
         ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_classes_program
+        FOREIGN KEY (program_id)
+        REFERENCES programs(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_classes_program_level
+        FOREIGN KEY (program_level_id)
+        REFERENCES program_levels(id)
+        ON DELETE SET NULL
         ON UPDATE CASCADE
 );
 
@@ -550,5 +567,226 @@ CREATE TABLE class_session_students (
         FOREIGN KEY (student_program_id)
         REFERENCES student_programs(id)
         ON DELETE RESTRICT
+        ON UPDATE CASCADE
+);
+
+-- ===========================================================
+-- LANDING PAGE CMS
+-- Setiap baris menyimpan satu section landing page sebagai JSON.
+-- section_key yang didukung: hero, trust, features, about, programs,
+-- method, schedule, facilities, pricing, testimonials, branches,
+-- faqs, articles, enrollment, footer.
+-- ===========================================================
+CREATE TABLE landing_sections (
+    section_key VARCHAR(50) NOT NULL,
+    content LONGTEXT NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    updated_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (section_key),
+    INDEX idx_landing_sections_active (is_active),
+    CONSTRAINT fk_landing_sections_user
+        FOREIGN KEY (updated_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
+-- ===========================================================
+-- RIWAYAT RESCHEDULE SESI / GURU / SISWA
+-- ===========================================================
+CREATE TABLE session_reschedules (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    type ENUM('SESSION', 'TEACHER', 'STUDENT') NOT NULL,
+    class_id BIGINT UNSIGNED NULL,
+    student_program_id BIGINT UNSIGNED NULL,
+    from_session_id BIGINT UNSIGNED NULL,
+    to_session_id BIGINT UNSIGNED NULL,
+    from_teacher_id BIGINT UNSIGNED NULL,
+    to_teacher_id BIGINT UNSIGNED NULL,
+    reason VARCHAR(500) NULL,
+    created_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    INDEX idx_session_reschedules_type (type),
+    INDEX idx_session_reschedules_class (class_id),
+    INDEX idx_session_reschedules_from_session (from_session_id),
+    INDEX idx_session_reschedules_created_at (created_at),
+    CONSTRAINT fk_session_reschedules_class
+        FOREIGN KEY (class_id)
+        REFERENCES classes(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_session_reschedules_student_program
+        FOREIGN KEY (student_program_id)
+        REFERENCES student_programs(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_session_reschedules_from_session
+        FOREIGN KEY (from_session_id)
+        REFERENCES class_sessions(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_session_reschedules_to_session
+        FOREIGN KEY (to_session_id)
+        REFERENCES class_sessions(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_session_reschedules_from_teacher
+        FOREIGN KEY (from_teacher_id)
+        REFERENCES teachers(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_session_reschedules_to_teacher
+        FOREIGN KEY (to_teacher_id)
+        REFERENCES teachers(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_session_reschedules_user
+        FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
+-- ===========================================================
+-- CASHFLOW / KEUANGAN
+-- ===========================================================
+CREATE TABLE cashflow_transactions (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    branch_id BIGINT UNSIGNED NULL,
+    transaction_date DATE NOT NULL,
+    type ENUM('INCOME', 'EXPENSE') NOT NULL,
+    category VARCHAR(100) NULL,
+    description VARCHAR(255) NOT NULL,
+    amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    payment_method VARCHAR(50) NULL,
+    reference VARCHAR(100) NULL,
+    notes VARCHAR(500) NULL,
+    created_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    INDEX idx_cashflow_date (transaction_date),
+    INDEX idx_cashflow_type (type),
+    INDEX idx_cashflow_branch (branch_id),
+    CONSTRAINT fk_cashflow_branch
+        FOREIGN KEY (branch_id)
+        REFERENCES branches(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_cashflow_user
+        FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
+-- ===========================================================
+-- ASSET MANAGEMENT
+-- ===========================================================
+CREATE TABLE asset_categories (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    slug VARCHAR(120) NOT NULL,
+    code_prefix VARCHAR(10) NULL,
+    description VARCHAR(255) NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_asset_categories_slug (slug),
+    UNIQUE KEY uq_asset_categories_name (name)
+);
+
+CREATE TABLE assets (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    code VARCHAR(60) NULL,
+    name VARCHAR(150) NOT NULL,
+    category_id BIGINT UNSIGNED NOT NULL,
+    branch_id BIGINT UNSIGNED NULL,
+    location VARCHAR(150) NULL,
+    purchase_date DATE NULL,
+    purchase_price DECIMAL(14,2) NOT NULL DEFAULT 0,
+    useful_life_years INT NULL,
+    `condition` ENUM('GOOD', 'FAIR', 'DAMAGED', 'BROKEN') NOT NULL DEFAULT 'GOOD',
+    status ENUM('ACTIVE', 'IN_USE', 'MAINTENANCE', 'RETIRED', 'LOST', 'DISPOSED')
+        NOT NULL DEFAULT 'ACTIVE',
+    responsible_user_id BIGINT UNSIGNED NULL,
+    responsible_name VARCHAR(150) NULL,
+    notes VARCHAR(500) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_assets_code (code),
+    INDEX idx_assets_category (category_id),
+    INDEX idx_assets_branch (branch_id),
+    INDEX idx_assets_status (status),
+    INDEX idx_assets_condition (`condition`),
+    CONSTRAINT fk_assets_category
+        FOREIGN KEY (category_id)
+        REFERENCES asset_categories(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_assets_branch
+        FOREIGN KEY (branch_id)
+        REFERENCES branches(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_assets_user
+        FOREIGN KEY (responsible_user_id)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE asset_movements (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    asset_id BIGINT UNSIGNED NOT NULL,
+    movement_date DATE NOT NULL,
+    from_branch_id BIGINT UNSIGNED NULL,
+    to_branch_id BIGINT UNSIGNED NULL,
+    from_location VARCHAR(150) NULL,
+    to_location VARCHAR(150) NULL,
+    from_responsible_user_id BIGINT UNSIGNED NULL,
+    to_responsible_user_id BIGINT UNSIGNED NULL,
+    from_responsible_name VARCHAR(150) NULL,
+    to_responsible_name VARCHAR(150) NULL,
+    notes VARCHAR(500) NULL,
+    created_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    INDEX idx_asset_movements_asset (asset_id),
+    INDEX idx_asset_movements_date (movement_date),
+    CONSTRAINT fk_asset_movements_asset
+        FOREIGN KEY (asset_id)
+        REFERENCES assets(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_asset_movements_from_branch
+        FOREIGN KEY (from_branch_id)
+        REFERENCES branches(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_asset_movements_to_branch
+        FOREIGN KEY (to_branch_id)
+        REFERENCES branches(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_asset_movements_from_user
+        FOREIGN KEY (from_responsible_user_id)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_asset_movements_to_user
+        FOREIGN KEY (to_responsible_user_id)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_asset_movements_user
+        FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
         ON UPDATE CASCADE
 );

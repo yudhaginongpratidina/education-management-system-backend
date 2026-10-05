@@ -7,6 +7,8 @@ import { classStatusSchema, idParam } from '../../shared/class/class.validation'
 export const createClassSchema = z.object({
     body: z.object({
         branch_id: z.number().int().positive('branch_id is required'),
+        program_id: z.number().int().positive().optional().nullable(),
+        program_level_id: z.number().int().positive().optional().nullable(),
         name: z.string().min(1, 'Name is required'),
         code: z.string().min(1, 'Code is required'),
         description: z.string().max(255).optional().nullable(),
@@ -19,6 +21,8 @@ export const updateClassSchema = z.object({
     body: z
         .object({
             branch_id: z.number().int().positive().optional(),
+            program_id: z.number().int().positive().optional().nullable(),
+            program_level_id: z.number().int().positive().optional().nullable(),
             name: z.string().min(1).optional(),
             code: z.string().min(1).optional(),
             description: z.string().max(255).optional().nullable(),
@@ -36,6 +40,7 @@ export const getClassSchema = z.object({
 export const listClassSchema = z.object({
     query: z.object({
         branch_id: z.coerce.number().int().positive().optional(),
+        program_id: z.coerce.number().int().positive().optional(),
         status: classStatusSchema.optional(),
         search: z.string().optional(),
         sort_by: z.enum(['name', 'code', 'status', 'created_at', 'updated_at']).optional(),

@@ -28,6 +28,32 @@ export const createClassSessionSchema = z
         path: ['body', 'end_time'],
     });
 
+export const bulkCreateSessionsSchema = z.object({
+    params: z.object({ classId: idParam }),
+    body: z.object({
+        teacher_id: z.number().int().positive(),
+        dates: z.array(dateSchema).min(1, 'At least one date is required').max(366),
+        time_slots: z
+            .array(
+                z
+                    .object({
+                        start_time: timeSchema,
+                        end_time: timeSchema,
+                    })
+                    .refine((slot) => slot.end_time > slot.start_time, {
+                        message: 'end_time must be greater than start_time',
+                        path: ['end_time'],
+                    }),
+            )
+            .min(1, 'At least one time slot is required')
+            .max(31),
+        student_program_ids: z.array(z.number().int().positive()).optional().default([]),
+        status: sessionStatusSchema.optional(),
+        notes: z.string().max(500).optional().nullable(),
+        skip_conflicts: z.boolean().optional().default(true),
+    }),
+});
+
 export const updateSessionSchema = z.object({
     params: z.object({ id: idParam }),
     body: z
@@ -146,6 +172,14 @@ export const bulkAttendanceSchema = z.object({
 
 export const sessionStudentParamsSchema = z.object({
     params: z.object({ sessionId: idParam, studentProgramId: idParam }),
+});
+
+export const rescheduleStudentSchema = z.object({
+    params: z.object({ sessionId: idParam, studentProgramId: idParam }),
+    body: z.object({
+        target_session_id: z.number().int().positive(),
+        reason: z.string().max(500).optional().nullable(),
+    }),
 });
 
 export const sessionIdParamsSchema = z.object({

@@ -79,6 +79,7 @@ export interface IClassSessionService {
     getSessions(filter: SessionListFilter, pagination?: Pagination): Promise<any>;
     getSessionById(id: number): Promise<any>;
     createClassSession(classId: number, data: any): Promise<any>;
+    bulkCreateSessions(classId: number, data: any): Promise<any>;
     updateSession(id: number, data: any): Promise<any>;
     deleteSession(id: number): Promise<void>;
     rescheduleSession(id: number, data: any): Promise<any>;
@@ -126,6 +127,8 @@ export interface IClassSessionStudentRepository {
         excludeSessionId?: number,
         executor?: QueryExecutor,
     ): Promise<any>;
+    getQuotaUsage(studentProgramId: number): Promise<any>;
+    findClassMembersWithQuota(classId: number): Promise<any>;
 }
 
 export interface IClassSessionStudentService {
@@ -146,6 +149,12 @@ export interface IClassSessionStudentService {
             notes?: string | null;
         }[],
     ): Promise<any>;
+    rescheduleStudent(
+        sessionId: number,
+        studentProgramId: number,
+        data: { target_session_id: number; reason?: string | null; created_by?: number | null },
+    ): Promise<any>;
+    getClassStudentQuotas(classId: number): Promise<any[]>;
 }
 
 // ============================================================
@@ -165,6 +174,7 @@ export interface ISessionGenerationService {
 export interface ISessionController {
     getClassSessions(req: Request, res: Response, next: NextFunction): Promise<void>;
     createClassSession(req: Request, res: Response, next: NextFunction): Promise<void>;
+    bulkCreateSessions(req: Request, res: Response, next: NextFunction): Promise<void>;
     getSessions(req: Request, res: Response, next: NextFunction): Promise<void>;
     getSession(req: Request, res: Response, next: NextFunction): Promise<void>;
     updateSession(req: Request, res: Response, next: NextFunction): Promise<void>;
@@ -179,4 +189,6 @@ export interface ISessionController {
     removeSessionStudent(req: Request, res: Response, next: NextFunction): Promise<void>;
     updateAttendance(req: Request, res: Response, next: NextFunction): Promise<void>;
     bulkUpdateAttendance(req: Request, res: Response, next: NextFunction): Promise<void>;
+    rescheduleStudent(req: Request, res: Response, next: NextFunction): Promise<void>;
+    getClassStudentQuotas(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

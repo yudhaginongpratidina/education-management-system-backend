@@ -10,6 +10,14 @@ export const normalizeTime = (time?: string | null): string | null => {
 // DATE value (YYYY-MM-DD) for "today".
 export const today = (): string => new Date().toISOString().slice(0, 10);
 
+// Normalize a DATE column (mysql2 returns it as a JS Date at UTC midnight with
+// `timezone: 'Z'`) or an ISO string to a plain YYYY-MM-DD string.
+export const toDateOnly = (value: unknown): string | null => {
+    if (value === null || value === undefined || value === '') return null;
+    if (value instanceof Date) return value.toISOString().slice(0, 10);
+    return String(value).slice(0, 10);
+};
+
 // Translate raw database integrity errors so they never reach the client.
 export const isDuplicateEntryError = (error: any): boolean => {
     const code = error?.code ?? error?.errno;

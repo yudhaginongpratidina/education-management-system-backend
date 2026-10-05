@@ -20,10 +20,17 @@ export interface IClassStudentRepository {
     studentProgramExists(studentProgramId: number): Promise<boolean>;
     getStudentProgram(studentProgramId: number): Promise<any>;
     isActiveMember(classId: number, studentProgramId: number): Promise<boolean>;
+    findEligibleStudents(params: {
+        classId: number;
+        branchId: number;
+        programId?: number | null;
+        levelId?: number | null;
+    }): Promise<any[]>;
 }
 
 export interface IClassStudentService {
     getClassStudents(classId: number): Promise<any>;
+    getEligibleStudents(classId: number): Promise<any[]>;
     addClassStudent(
         classId: number,
         data: { student_program_id: number; joined_at?: string },
@@ -38,6 +45,7 @@ export interface IClassStudentService {
 
 export interface IClassStudentController {
     getClassStudents(req: Request, res: Response, next: NextFunction): Promise<void>;
+    getEligibleStudents(req: Request, res: Response, next: NextFunction): Promise<void>;
     addClassStudent(req: Request, res: Response, next: NextFunction): Promise<void>;
     updateClassStudent(req: Request, res: Response, next: NextFunction): Promise<void>;
     removeClassStudent(req: Request, res: Response, next: NextFunction): Promise<void>;

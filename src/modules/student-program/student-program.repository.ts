@@ -9,6 +9,10 @@ export class StudentProgramRepository implements IStudentProgramRepository {
                s.full_name as student_full_name,
                b.name as branch_name,
                pp.name as package_name,
+               pp.duration_months as package_duration_months,
+               pp.sessions_per_period as package_sessions_per_period,
+               pp.session_period as package_session_period,
+               pp.bonus_duration_months as package_bonus_duration_months,
                pl.name as level_name
         FROM student_programs sp
         LEFT JOIN students s ON sp.student_id = s.id
@@ -32,8 +36,9 @@ export class StudentProgramRepository implements IStudentProgramRepository {
         const query = `
             INSERT INTO student_programs (
                 student_id, branch_id, program_package_id, program_level_id,
-                status, started_at, ended_at, normal_price, selling_price, notes
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                status, started_at, ended_at, normal_price, selling_price, notes,
+                duration_months, sessions_per_period, session_period, total_sessions
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         `;
         await this.db.query(query, [
             data.student_id,
@@ -46,6 +51,10 @@ export class StudentProgramRepository implements IStudentProgramRepository {
             data.normal_price,
             data.selling_price,
             data.notes ?? null,
+            data.duration_months ?? null,
+            data.sessions_per_period ?? null,
+            data.session_period ?? null,
+            data.total_sessions ?? null,
         ]);
 
         const selectQuery = `SELECT * FROM student_programs WHERE id = LAST_INSERT_ID();`;
@@ -136,5 +145,32 @@ export class StudentProgramRepository implements IStudentProgramRepository {
     async delete(id: number): Promise<void> {
         const query = `DELETE FROM student_programs WHERE id = ?;`;
         await this.db.query(query, [id]);
+    }
+
+    async getPackage(packageId: number): Promise<any | null> {
+        const result = await this.db.query(
+            `SELECT id, program_id, name, duration_months, sessions_per_period, session_period,
+                    normal_price, selling_price, bonus_duration_months, status
+             FROM program_packages WHERE id = ? LIMIT 1;`,
+            [packageId],
+        );
+        return result.rows[0] ?? null;
+    }
+
+    async getSessionUsage(studentProgramId: number): Promise<any> {
+        const result = await this.db.query(
+            `SELECT
+                COUNT(*) AS total_scheduled,
+                SUM(CASE WHEN css.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) AS present,
+                SUM(CASE WHEN css.attendance_status = 'ABSENT' THEN 1 ELSE 0 END) AS absent,
+                SUM(CASE WHEN css.attendance_status = 'SICK' THEN 1 ELSE 0 END) AS sick,
+                SUM(CASE WHEN css.attendance_status = 'PERMISSION' THEN 1 ELSE 0 END) AS permission,
+                SUM(CASE WHEN css.attendance_status = 'RESCHEDULED' THEN 1 ELSE 0 END) AS rescheduled
+             FROM class_session_students css
+             JOIN class_sessions cs ON css.session_id = cs.id
+             WHERE css.student_program_id = ?;`,
+            [studentProgramId],
+        );
+        return result.rows[0] ?? {};
     }
 }

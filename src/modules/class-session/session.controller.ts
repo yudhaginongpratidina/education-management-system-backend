@@ -28,6 +28,11 @@ export class SessionController implements ISessionController {
         return filter;
     }
 
+    private userId(req: Request): number | null {
+        const user = (req as any).user;
+        return user?.id ? Number(user.id) : null;
+    }
+
     // ---------- sessions (nested under a class) ----------
     getClassSessions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
@@ -45,6 +50,25 @@ export class SessionController implements ISessionController {
         }
     };
 
+    getClassStudentQuotas = async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<void> => {
+        try {
+            const response = await this.sessionStudentService.getClassStudentQuotas(
+                Number(req.params.classId),
+            );
+            res.status(200).json({
+                success: true,
+                message: 'Class student quotas fetched',
+                data: response,
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
     createClassSession = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const response = await this.service.createClassSession(
@@ -52,6 +76,22 @@ export class SessionController implements ISessionController {
                 req.body,
             );
             res.status(201).json({ success: true, message: 'Session created', data: response });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    bulkCreateSessions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const response = await this.service.bulkCreateSessions(
+                Number(req.params.classId),
+                req.body,
+            );
+            res.status(201).json({
+                success: true,
+                message: `${response.created_count} session(s) created, ${response.skipped_count} skipped`,
+                data: response,
+            });
         } catch (error) {
             next(error);
         }
@@ -99,7 +139,10 @@ export class SessionController implements ISessionController {
 
     rescheduleSession = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const response = await this.service.rescheduleSession(Number(req.params.id), req.body);
+            const response = await this.service.rescheduleSession(Number(req.params.id), {
+                ...req.body,
+                created_by: this.userId(req),
+            });
             res.status(200).json({ success: true, message: 'Session rescheduled', data: response });
         } catch (error) {
             next(error);
@@ -108,7 +151,10 @@ export class SessionController implements ISessionController {
 
     substituteTeacher = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const response = await this.service.substituteTeacher(Number(req.params.id), req.body);
+            const response = await this.service.substituteTeacher(Number(req.params.id), {
+                ...req.body,
+                created_by: this.userId(req),
+            });
             res.status(200).json({
                 success: true,
                 message: 'Substitute teacher assigned',
@@ -243,6 +289,24 @@ export class SessionController implements ISessionController {
                 req.body.records,
             );
             res.status(200).json({ success: true, message: 'Attendance updated', data: response });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    // ---------- student reschedule ----------
+    rescheduleStudent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const response = await this.sessionStudentService.rescheduleStudent(
+                Number(req.params.sessionId),
+                Number(req.params.studentProgramId),
+                { ...req.body, created_by: this.userId(req) },
+            );
+            res.status(200).json({
+                success: true,
+                message: 'Student rescheduled',
+                data: response,
+            });
         } catch (error) {
             next(error);
         }

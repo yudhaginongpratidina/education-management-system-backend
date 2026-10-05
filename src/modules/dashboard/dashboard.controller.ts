@@ -57,4 +57,13 @@ export class DashboardController implements IDashboardController {
             next(error);
         }
     };
+
+    get_overview = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        try {
+            const data = await this.service.getOverview();
+            return res.status(200).json({ success: true, message: 'Dashboard overview', data });
+        } catch (error) {
+            next(error);
+        }
+    };
 }

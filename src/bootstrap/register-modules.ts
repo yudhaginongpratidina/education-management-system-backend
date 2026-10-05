@@ -39,6 +39,12 @@ import { classStudentModule } from '../modules/class-student/index';
 import { classTeacherModule } from '../modules/class-teacher/index';
 import { classScheduleModule } from '../modules/class-schedule/index';
 import { classSessionModule } from '../modules/class-session/index';
+import { teacherSessionModule } from '../modules/teacher-session/index';
+import { sessionRescheduleModule } from '../modules/session-reschedule/index';
+import { landingCmsModule } from '../modules/landing-cms/index';
+import { reportModule } from '../modules/report/index';
+import { cashflowModule } from '../modules/cashflow/index';
+import { assetModule } from '../modules/asset/index';
 
 const modules: Module[] = [
     roleModule,
@@ -66,6 +72,12 @@ const modules: Module[] = [
     classTeacherModule,
     classScheduleModule,
     classSessionModule,
+    teacherSessionModule,
+    sessionRescheduleModule,
+    landingCmsModule,
+    reportModule,
+    cashflowModule,
+    assetModule,
 ];
 
 // STRATEGY CONFIG

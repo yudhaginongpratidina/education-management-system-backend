@@ -40,6 +40,12 @@ import { classStudentOpenApi } from '../modules/class-student/class-student.open
 import { classTeacherOpenApi } from '../modules/class-teacher/class-teacher.openapi';
 import { classScheduleOpenApi } from '../modules/class-schedule/class-schedule.openapi';
 import { classSessionOpenApi } from '../modules/class-session/class-session.openapi';
+import { teacherSessionOpenApi } from '../modules/teacher-session/teacher-session.openapi';
+import { sessionRescheduleOpenApi } from '../modules/session-reschedule/session-reschedule.openapi';
+import { landingCmsOpenApi } from '../modules/landing-cms/landing-cms.openapi';
+import { reportOpenApi } from '../modules/report/report.openapi';
+import { cashflowOpenApi } from '../modules/cashflow/cashflow.openapi';
+import { assetOpenApi } from '../modules/asset/asset.openapi';
 
 export const setupOpenApi = (app: Express) => {
     const openApiSpecification = {
@@ -92,6 +98,12 @@ export const setupOpenApi = (app: Express) => {
             ...classTeacherOpenApi.paths,
             ...classScheduleOpenApi.paths,
             ...classSessionOpenApi.paths,
+            ...teacherSessionOpenApi.paths,
+            ...sessionRescheduleOpenApi.paths,
+            ...landingCmsOpenApi.paths,
+            ...reportOpenApi.paths,
+            ...cashflowOpenApi.paths,
+            ...assetOpenApi.paths,
         },
         components: {
             securitySchemes: {
@@ -108,6 +120,11 @@ export const setupOpenApi = (app: Express) => {
                 ...classTeacherOpenApi.components.parameters,
                 ...classScheduleOpenApi.components.parameters,
                 ...classSessionOpenApi.components.parameters,
+                ...landingCmsOpenApi.components.parameters,
+                ...sessionRescheduleOpenApi.components.parameters,
+                ...reportOpenApi.components.parameters,
+                ...cashflowOpenApi.components.parameters,
+                ...assetOpenApi.components.parameters,
             },
             schemas: {
                 ...storageOpenApi.components.schemas,
@@ -135,6 +152,12 @@ export const setupOpenApi = (app: Express) => {
                 ...classTeacherOpenApi.components.schemas,
                 ...classScheduleOpenApi.components.schemas,
                 ...classSessionOpenApi.components.schemas,
+                ...teacherSessionOpenApi.components.schemas,
+                ...landingCmsOpenApi.components.schemas,
+                ...sessionRescheduleOpenApi.components.schemas,
+                ...reportOpenApi.components.schemas,
+                ...cashflowOpenApi.components.schemas,
+                ...assetOpenApi.components.schemas,
             },
         },
     };

@@ -22,6 +22,31 @@ export class ClassStudentService implements IClassStudentService {
         return await this.repository.findByClass(classId);
     }
 
+    /**
+     * Students that may be added to this class: same branch, matching program
+     * (and level), still active, not already a member. Includes quota info.
+     */
+    async getEligibleStudents(classId: number): Promise<any[]> {
+        const klass = await this.getClassOrFail(classId);
+        const rows = await this.repository.findEligibleStudents({
+            classId,
+            branchId: klass.branch_id,
+            programId: klass.program_id,
+            levelId: klass.program_level_id,
+        });
+        return rows.map((row) => {
+            const total = row.total_sessions != null ? Number(row.total_sessions) : null;
+            const used = Number(row.used ?? 0);
+            return {
+                ...row,
+                total_sessions: total,
+                used,
+                remaining: total !== null && total > 0 ? Math.max(total - used, 0) : null,
+                can_join: total === null || total <= 0 ? true : used < total,
+            };
+        });
+    }
+
     async addClassStudent(
         classId: number,
         data: { student_program_id: number; joined_at?: string },
@@ -44,6 +69,39 @@ export class ClassStudentService implements IClassStudentService {
                 'Student program branch does not match class branch',
                 'STUDENT_BRANCH_MISMATCH',
                 true,
+            );
+        }
+
+        // The class is tied to a program: the enrollment must belong to it.
+        if (klass.program_id) {
+            const enrollmentProgramId =
+                studentProgram.package_program_id ?? studentProgram.level_program_id;
+            if (Number(enrollmentProgramId) !== Number(klass.program_id)) {
+                throw new HttpError(
+                    409,
+                    'Program siswa tidak sesuai dengan program kelas',
+                    'PROGRAM_MISMATCH',
+                    true,
+                    {
+                        class_program_id: klass.program_id,
+                        enrollment_program_id: enrollmentProgramId ?? null,
+                    },
+                );
+            }
+        }
+        if (
+            klass.program_level_id &&
+            Number(studentProgram.program_level_id) !== Number(klass.program_level_id)
+        ) {
+            throw new HttpError(
+                409,
+                'Level siswa tidak sesuai dengan level kelas',
+                'LEVEL_MISMATCH',
+                true,
+                {
+                    class_level_id: klass.program_level_id,
+                    enrollment_level_id: studentProgram.program_level_id ?? null,
+                },
             );
         }
 
