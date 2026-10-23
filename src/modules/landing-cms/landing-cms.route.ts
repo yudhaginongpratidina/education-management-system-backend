@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import multer from 'multer';
 import { asyncHandler } from '../../core/http/async-handler';
 import { validate } from '../../shared/middleware/validate.middleware';
 import authMiddleware from '../../shared/middleware/auth.middleware';
@@ -8,6 +9,11 @@ import {
     upsertSectionSchema,
 } from './landing-cms.validation';
 import type { ILandingCmsController } from './landing-cms.interface';
+
+const upload = multer({
+    dest: 'uploads/',
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+});
 
 export class LandingCmsRoutes {
     constructor(private readonly controller: ILandingCmsController) {}
@@ -20,6 +26,15 @@ export class LandingCmsRoutes {
 
         // ---------- admin (requires authentication) ----------
         router.use(authMiddleware);
+
+        router.post(
+            '/upload',
+            upload.fields([
+                { name: 'image', maxCount: 1 },
+                { name: 'file', maxCount: 1 },
+            ]),
+            asyncHandler(this.controller.uploadImage),
+        );
 
         router.get('/sections', asyncHandler(this.controller.getSections));
         router.put(

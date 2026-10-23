@@ -5,6 +5,8 @@ import { LandingCmsRepository } from './landing-cms.repository';
 import { LandingCmsService } from './landing-cms.service';
 import { LandingCmsController } from './landing-cms.controller';
 import { LandingCmsRoutes } from './landing-cms.route';
+import { StorageRepository } from '../storage/storage.repository';
+import { StorageService } from '../storage/storage.service';
 
 export const landingCmsModule: Module = {
     name: 'landing-cms',
@@ -14,7 +16,9 @@ export const landingCmsModule: Module = {
 
         const repository = new LandingCmsRepository(database);
         const service = new LandingCmsService(repository);
-        const controller = new LandingCmsController(service);
+        const storageRepository = new StorageRepository(database);
+        const storageService = new StorageService(storageRepository);
+        const controller = new LandingCmsController(service, storageService);
         const routes = new LandingCmsRoutes(controller);
 
         app.use('/landing', routes.router());

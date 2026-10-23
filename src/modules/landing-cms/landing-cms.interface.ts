@@ -71,4 +71,5 @@ export interface ILandingCmsController {
     bulkUpsert(req: Request, res: Response, next: NextFunction): Promise<void>;
     deleteSection(req: Request, res: Response, next: NextFunction): Promise<void>;
     reset(req: Request, res: Response, next: NextFunction): Promise<void>;
+    uploadImage(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

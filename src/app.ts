@@ -38,6 +38,10 @@ export const createApp = (): Express => {
     app.use(cookieParser());
     app.use(express.urlencoded({ extended: true }));
 
+    // 📁 STATIC UPLOADS / STORAGE
+    app.use('/storage', express.static('uploads'));
+    app.use('/uploads', express.static('uploads'));
+
     // 🧠 REQUEST CONTEXT
     app.use(requestContextMiddleware);
 
