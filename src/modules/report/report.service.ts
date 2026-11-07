@@ -279,6 +279,18 @@ export class ReportService implements IReportService {
         const report = await this.getTeacherAttendance(filter);
         const workbook = new ExcelJS.Workbook();
 
+        const resolvePhotoUrl = (photo?: string | null): string => {
+            if (!photo || photo === '-' || photo === 'null' || photo.trim() === '') return '-';
+            const trimmed = photo.trim();
+            if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+            const baseUrl =
+                process.env.APP_URL || process.env.API_URL || 'http://localhost:4000';
+            const clean = trimmed.startsWith('/storage/')
+                ? trimmed.replace('/storage/', '')
+                : trimmed.replace(/^\/+/, '');
+            return `${baseUrl}/storage/${clean}`;
+        };
+
         const sheet = workbook.addWorksheet('Absensi Guru');
         sheet.columns = [
             { header: 'Tanggal', key: 'attendance_date', width: 14 },
@@ -286,12 +298,60 @@ export class ReportService implements IReportService {
             { header: 'Cabang', key: 'branch_name', width: 22 },
             { header: 'Status', key: 'status', width: 14 },
             { header: 'Datang', key: 'check_in_at', width: 20 },
+            { header: 'Foto Check-in', key: 'check_in_photo_display', width: 35 },
             { header: 'Keluar', key: 'check_out_at', width: 20 },
+            { header: 'Foto Check-out', key: 'check_out_photo_display', width: 35 },
             { header: 'Durasi (menit)', key: 'duration_minutes', width: 16 },
             { header: 'Durasi (jam)', key: 'duration_hours', width: 14 },
             { header: 'Catatan', key: 'notes', width: 30 },
         ];
-        sheet.addRows(report.data);
+
+        report.data.forEach((item: any) => {
+            const hasCheckInPhoto =
+                item.check_in_photo &&
+                item.check_in_photo !== '-' &&
+                item.check_in_photo !== 'null';
+            const hasCheckOutPhoto =
+                item.check_out_photo &&
+                item.check_out_photo !== '-' &&
+                item.check_out_photo !== 'null';
+
+            const row = sheet.addRow({
+                attendance_date: item.attendance_date,
+                teacher_name: item.teacher_name,
+                branch_name: item.branch_name,
+                status: item.status,
+                check_in_at: item.check_in_at,
+                check_in_photo_display: hasCheckInPhoto ? 'Lihat Foto Check-in' : '-',
+                check_out_at: item.check_out_at,
+                check_out_photo_display: hasCheckOutPhoto ? 'Lihat Foto Check-out' : '-',
+                duration_minutes: item.duration_minutes,
+                duration_hours: item.duration_hours,
+                notes: item.notes,
+            });
+
+            if (hasCheckInPhoto) {
+                const cell = row.getCell('check_in_photo_display');
+                const photoUrl = resolvePhotoUrl(item.check_in_photo);
+                cell.value = {
+                    text: photoUrl,
+                    hyperlink: photoUrl,
+                    tooltip: 'Klik untuk membuka foto check-in',
+                };
+                cell.font = { color: { argb: 'FF0066CC' }, underline: true };
+            }
+
+            if (hasCheckOutPhoto) {
+                const cell = row.getCell('check_out_photo_display');
+                const photoUrl = resolvePhotoUrl(item.check_out_photo);
+                cell.value = {
+                    text: photoUrl,
+                    hyperlink: photoUrl,
+                    tooltip: 'Klik untuk membuka foto check-out',
+                };
+                cell.font = { color: { argb: 'FF0066CC' }, underline: true };
+            }
+        });
         this.styleHeader(sheet);
 
         const statsSheet = workbook.addWorksheet('Ringkasan');

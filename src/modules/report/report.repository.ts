@@ -39,6 +39,10 @@ export class ReportRepository implements IReportRepository {
             conditions.push('ta.teacher_id = ?');
             values.push(filter.teacher_id);
         }
+        if (filter.teacher_name) {
+            conditions.push('t.full_name LIKE ?');
+            values.push(`%${filter.teacher_name}%`);
+        }
         if (filter.status) {
             conditions.push('ta.status = ?');
             values.push(filter.status);
@@ -56,6 +60,8 @@ export class ReportRepository implements IReportRepository {
                 ta.attendance_date,
                 ta.check_in_at,
                 ta.check_out_at,
+                ta.check_in_photo,
+                ta.check_out_photo,
                 TIMESTAMPDIFF(MINUTE, ta.check_in_at, ta.check_out_at) AS duration_minutes,
                 ta.notes,
                 ta.is_approved
@@ -81,6 +87,10 @@ export class ReportRepository implements IReportRepository {
             conditions.push('ta.teacher_id = ?');
             values.push(filter.teacher_id);
         }
+        if (filter.teacher_name) {
+            conditions.push('t.full_name LIKE ?');
+            values.push(`%${filter.teacher_name}%`);
+        }
 
         const result = await this.db.query(
             `SELECT
@@ -88,6 +98,7 @@ export class ReportRepository implements IReportRepository {
                 COUNT(*) AS count,
                 COALESCE(SUM(TIMESTAMPDIFF(MINUTE, ta.check_in_at, ta.check_out_at)), 0) AS minutes
              FROM teacher_attendances ta
+             JOIN teachers t ON ta.teacher_id = t.id
              ${this.where(conditions)}
              GROUP BY ta.status`,
             values,
@@ -112,6 +123,14 @@ export class ReportRepository implements IReportRepository {
         if (filter.class_id) {
             conditions.push('cs.class_id = ?');
             values.push(filter.class_id);
+        }
+        if (filter.student_id) {
+            conditions.push('s.id = ?');
+            values.push(filter.student_id);
+        }
+        if (filter.student_name) {
+            conditions.push('s.full_name LIKE ?');
+            values.push(`%${filter.student_name}%`);
         }
         if (filter.status) {
             conditions.push('css.attendance_status = ?');
@@ -270,12 +289,12 @@ export class ReportRepository implements IReportRepository {
                 s.full_name AS student_name,
                 sr.from_session_id,
                 sr.to_session_id,
-                fs.scheduled_date AS from_date,
-                fs.start_time AS from_start_time,
-                fs.end_time AS from_end_time,
-                ts.scheduled_date AS to_date,
-                ts.start_time AS to_start_time,
-                ts.end_time AS to_end_time,
+                fs.scheduled_date AS \`from_date\`,
+                fs.start_time AS \`from_start_time\`,
+                fs.end_time AS \`from_end_time\`,
+                ts.scheduled_date AS \`to_date\`,
+                ts.start_time AS \`to_start_time\`,
+                ts.end_time AS \`to_end_time\`,
                 ft.full_name AS from_teacher_name,
                 tt.full_name AS to_teacher_name,
                 sr.reason,

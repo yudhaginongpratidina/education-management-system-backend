@@ -11,10 +11,10 @@ export class BranchService implements IBranchService {
 
     async create_branch(data: {
         name: string;
-        address: string;
-        latitude: string;
-        longitude: string;
-        radius: string;
+        address?: string | null;
+        latitude?: string | null;
+        longitude?: string | null;
+        radius?: string | null;
     }): Promise<any> {
         const slug = create_slug(data.name);
 
@@ -29,7 +29,14 @@ export class BranchService implements IBranchService {
             );
         }
 
-        return await this.repository.create_branch({ ...data, slug });
+        return await this.repository.create_branch({
+            name: data.name,
+            slug,
+            address: data.address === '' || data.address === undefined ? null : data.address,
+            latitude: data.latitude === '' || data.latitude === undefined ? null : data.latitude,
+            longitude: data.longitude === '' || data.longitude === undefined ? null : data.longitude,
+            radius: data.radius === '' || data.radius === undefined ? null : data.radius,
+        });
     }
 
     async get_branches(): Promise<any> {
@@ -43,21 +50,22 @@ export class BranchService implements IBranchService {
     async update_branch(data: {
         id: number;
         name?: string;
-        address?: string;
-        latitude?: string;
-        longitude?: string;
-        radius?: string;
+        address?: string | null;
+        latitude?: string | null;
+        longitude?: string | null;
+        radius?: string | null;
     }): Promise<any> {
-        const updateData: any = { ...data };
+        const updateData: any = { id: data.id };
 
-        if (data.name) {
+        if (data.name !== undefined) {
+            updateData.name = data.name;
             const newSlug = create_slug(data.name);
 
             // Check if name actually changed and if new slug already exists (excluding current branch)
             const currentBranch = await this.repository.get_branch({ id: data.id });
             if (currentBranch && currentBranch.slug !== newSlug) {
                 const existing = await this.repository.get_branch({ slug: newSlug });
-                if (existing) {
+                if (existing && existing.id !== data.id) {
                     throw new HttpError(
                         400,
                         'Branch with this name already exists',
@@ -67,6 +75,19 @@ export class BranchService implements IBranchService {
                 }
                 updateData.slug = newSlug;
             }
+        }
+
+        if (data.address !== undefined) {
+            updateData.address = data.address === '' ? null : data.address;
+        }
+        if (data.latitude !== undefined) {
+            updateData.latitude = data.latitude === '' ? null : data.latitude;
+        }
+        if (data.longitude !== undefined) {
+            updateData.longitude = data.longitude === '' ? null : data.longitude;
+        }
+        if (data.radius !== undefined) {
+            updateData.radius = data.radius === '' ? null : data.radius;
         }
 
         return await this.repository.update_branch(updateData);

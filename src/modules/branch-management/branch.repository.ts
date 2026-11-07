@@ -7,19 +7,19 @@ export class BranchRepository implements IBranchRepository {
     async create_branch(data: {
         name: string;
         slug: string;
-        address: string;
-        latitude: string;
-        longitude: string;
-        radius: string;
+        address?: string | null;
+        latitude?: string | null;
+        longitude?: string | null;
+        radius?: string | null;
     }): Promise<any> {
         const query = `INSERT INTO branches (name, slug, address, latitude, longitude, radius) VALUES (?, ?, ?, ?, ?, ?);`;
         await this.db.query(query, [
             data.name,
             data.slug,
-            data.address,
-            data.latitude,
-            data.longitude,
-            data.radius,
+            data.address === '' || data.address === undefined ? null : data.address,
+            data.latitude === '' || data.latitude === undefined ? null : data.latitude,
+            data.longitude === '' || data.longitude === undefined ? null : data.longitude,
+            data.radius === '' || data.radius === undefined ? null : data.radius,
         ]);
         const selectQuery = `SELECT * FROM branches WHERE slug = ? LIMIT 1;`;
         const result = await this.db.query(selectQuery, [data.slug]);
@@ -56,10 +56,10 @@ export class BranchRepository implements IBranchRepository {
         id: number;
         name?: string;
         slug?: string;
-        address?: string;
-        latitude?: string;
-        longitude?: string;
-        radius?: string;
+        address?: string | null;
+        latitude?: string | null;
+        longitude?: string | null;
+        radius?: string | null;
     }): Promise<any> {
         const fields: string[] = [];
         const values: unknown[] = [];
@@ -74,19 +74,19 @@ export class BranchRepository implements IBranchRepository {
         }
         if (data.address !== undefined) {
             fields.push('address = ?');
-            values.push(data.address);
+            values.push(data.address === '' ? null : data.address);
         }
         if (data.latitude !== undefined) {
             fields.push('latitude = ?');
-            values.push(data.latitude);
+            values.push(data.latitude === '' ? null : data.latitude);
         }
         if (data.longitude !== undefined) {
             fields.push('longitude = ?');
-            values.push(data.longitude);
+            values.push(data.longitude === '' ? null : data.longitude);
         }
         if (data.radius !== undefined) {
             fields.push('radius = ?');
-            values.push(data.radius);
+            values.push(data.radius === '' ? null : data.radius);
         }
 
         if (fields.length === 0) return null;

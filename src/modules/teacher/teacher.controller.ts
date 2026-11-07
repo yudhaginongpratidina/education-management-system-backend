@@ -57,4 +57,19 @@ export class TeacherController implements ITeacherController {
             next(error);
         }
     };
+
+    reset_password = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const slug = req.params.slug as string;
+            const newPassword = req.body?.password || 'password123';
+            const result = await this.teacherService.reset_password(slug, newPassword);
+            res.status(200).json({
+                success: true,
+                message: result.message || 'Password guru berhasil direset ke password123',
+                data: result,
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
 }

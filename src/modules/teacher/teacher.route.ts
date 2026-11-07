@@ -24,6 +24,7 @@ export class TeacherRoutes {
             asyncHandler(this.controller.update_teacher),
         );
         router.delete('/:slug', asyncHandler(this.controller.delete_teacher));
+        router.post('/:slug/reset-password', asyncHandler(this.controller.reset_password));
 
         return router;
     }

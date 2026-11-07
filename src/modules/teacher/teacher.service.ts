@@ -1,3 +1,6 @@
+// errors
+import { HttpError } from '../../core/errors/http.error';
+
 // interface
 import type { ITeacherRepository, ITeacherService } from './teacher.interface';
 import type { IUserRepository } from '../user-management/user.interface';
@@ -96,5 +99,42 @@ export class TeacherService implements ITeacherService {
             }
         }
         return await this.teacherRepository.delete_teacher(slug);
+    }
+
+    async reset_password(slug: string, newPassword = 'password123'): Promise<any> {
+        let teachers = await this.teacherRepository.get_teacher({ slug });
+        if (!teachers || teachers.length === 0) {
+            const numericId = Number(slug);
+            if (!isNaN(numericId)) {
+                teachers = await this.teacherRepository.get_teacher({ id: numericId });
+            }
+        }
+
+        if (!teachers || teachers.length === 0) {
+            throw new HttpError(404, 'Data guru tidak ditemukan', 'TEACHER_NOT_FOUND', true);
+        }
+
+        const teacher = teachers[0];
+        if (!teacher.user_id) {
+            throw new HttpError(
+                400,
+                'Guru ini belum memiliki akun user yang terhubung',
+                'USER_NOT_LINKED',
+                true,
+            );
+        }
+
+        const password_hash = await hashing_password(newPassword);
+        await this.userRepository.update_password({
+            id: Number(teacher.user_id),
+            password_hash,
+        });
+
+        return {
+            teacher_id: teacher.id,
+            teacher_name: teacher.full_name,
+            user_id: teacher.user_id,
+            message: `Password akun guru ${teacher.full_name} berhasil direset ke "${newPassword}"`,
+        };
     }
 }

@@ -5,6 +5,9 @@ export interface ReportFilter {
     date_to?: string;
     branch_id?: number;
     teacher_id?: number;
+    teacher_name?: string;
+    student_id?: number;
+    student_name?: string;
     class_id?: number;
     status?: string;
     type?: 'SESSION' | 'TEACHER' | 'STUDENT';

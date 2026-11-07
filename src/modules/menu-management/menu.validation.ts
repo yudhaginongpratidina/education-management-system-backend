@@ -12,3 +12,18 @@ export const menuSchema = z.object({
         is_active: z.boolean().optional(),
     }),
 });
+
+export const reorderMenuSchema = z.object({
+    body: z.object({
+        orders: z
+            .array(
+                z.object({
+                    id: z.number(),
+                    sort_order: z.number(),
+                    parent_id: z.number().nullable().optional(),
+                }),
+            )
+            .optional(),
+        ids: z.array(z.number()).optional(),
+    }),
+});

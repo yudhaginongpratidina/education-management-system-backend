@@ -29,7 +29,12 @@ export class TeacherRepository implements ITeacherRepository {
             data.photo,
             data.still_actively_working,
         ]);
-        const selectQuery = `SELECT * FROM teachers WHERE slug = ? LIMIT 1;`;
+        const selectQuery = `
+            SELECT t.*, u.email 
+            FROM teachers t 
+            LEFT JOIN users u ON t.user_id = u.id 
+            WHERE t.slug = ? LIMIT 1;
+        `;
         const result = await this.db.query(selectQuery, [data.slug]);
         return result.rows[0];
     }
@@ -44,23 +49,27 @@ export class TeacherRepository implements ITeacherRepository {
         const values: unknown[] = [];
 
         if (filter.id !== undefined) {
-            conditions.push('id = ?');
+            conditions.push('t.id = ?');
             values.push(filter.id);
         }
         if (filter.full_name !== undefined) {
-            conditions.push('full_name = ?');
+            conditions.push('t.full_name = ?');
             values.push(filter.full_name);
         }
         if (filter.slug !== undefined) {
-            conditions.push('slug = ?');
+            conditions.push('t.slug = ?');
             values.push(filter.slug);
         }
         if (filter.phone_number !== undefined) {
-            conditions.push('phone_number = ?');
+            conditions.push('t.phone_number = ?');
             values.push(filter.phone_number);
         }
 
-        let query = `SELECT * FROM teachers`;
+        let query = `
+            SELECT t.*, u.email 
+            FROM teachers t 
+            LEFT JOIN users u ON t.user_id = u.id
+        `;
         if (conditions.length > 0) {
             query += ` WHERE ${conditions.join(' AND ')}`;
         }
@@ -95,7 +104,12 @@ export class TeacherRepository implements ITeacherRepository {
             data.still_actively_working,
             data.id,
         ]);
-        const selectQuery = `SELECT * FROM teachers WHERE id = ? LIMIT 1;`;
+        const selectQuery = `
+            SELECT t.*, u.email 
+            FROM teachers t 
+            LEFT JOIN users u ON t.user_id = u.id 
+            WHERE t.id = ? LIMIT 1;
+        `;
         const result = await this.db.query(selectQuery, [data.id]);
         return result.rows[0];
     }

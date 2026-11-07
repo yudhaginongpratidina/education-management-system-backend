@@ -5,6 +5,8 @@ import { ThemeRepository } from './theme.repository';
 import { ThemeService } from './theme.service';
 import { ThemeController } from './theme.controller';
 import { ThemeRoutes } from './theme.route';
+import { StorageRepository } from '../storage/storage.repository';
+import { StorageService } from '../storage/storage.service';
 
 export const themeModule: Module = {
     name: 'theme',
@@ -14,7 +16,9 @@ export const themeModule: Module = {
 
         const repository = new ThemeRepository(database);
         const service = new ThemeService(repository);
-        const controller = new ThemeController(service);
+        const storageRepository = new StorageRepository(database);
+        const storageService = new StorageService(storageRepository);
+        const controller = new ThemeController(service, storageService);
         const routes = new ThemeRoutes(controller);
 
         app.use('/theme', routes.router());

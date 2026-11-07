@@ -24,6 +24,7 @@ export default async function authMiddleware(req: Request, res: Response, next: 
         (req as any).user = {
             id: decoded.sub,
             session_id: decoded.sid,
+            role: (decoded as any).role,
         };
         next();
     } catch (error) {

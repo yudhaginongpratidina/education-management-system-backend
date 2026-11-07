@@ -51,4 +51,18 @@ export class MenuService implements IMenuService {
             throw new HttpError(404, 'Menu not found', 'MENU_NOT_FOUND', true);
         return await this.repo.delete_menu(slug);
     }
+
+    async reorder_menu(data: {
+        orders?: { id: number; sort_order: number; parent_id?: number | null }[];
+        ids?: number[];
+    }): Promise<any> {
+        let orders = data.orders;
+        if (!orders && data.ids) {
+            orders = data.ids.map((id, index) => ({ id, sort_order: index + 1 }));
+        }
+        if (!orders || orders.length === 0) {
+            throw new HttpError(400, 'Orders or ids are required', 'INVALID_REORDER_PAYLOAD', true);
+        }
+        return await this.repo.reorder_menu(orders);
+    }
 }

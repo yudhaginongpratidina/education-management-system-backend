@@ -19,6 +19,7 @@ export const createApp = (): Express => {
     app.use(
         helmet({
             contentSecurityPolicy: false,
+            crossOriginResourcePolicy: { policy: 'cross-origin' },
         }),
     );
     const corsOrigins = env.security.corsOrigins;
@@ -39,8 +40,14 @@ export const createApp = (): Express => {
     app.use(express.urlencoded({ extended: true }));
 
     // 📁 STATIC UPLOADS / STORAGE
-    app.use('/storage', express.static('uploads'));
-    app.use('/uploads', express.static('uploads'));
+    const staticOptions = {
+        setHeaders: (res: any) => {
+            res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+        },
+    };
+    app.use('/storage', express.static('uploads', staticOptions));
+    app.use('/uploads', express.static('uploads', staticOptions));
 
     // 🧠 REQUEST CONTEXT
     app.use(requestContextMiddleware);

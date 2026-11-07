@@ -24,6 +24,8 @@ export class StorageController implements IStorageController {
             const fileData = await this.service.get(slug);
 
             const filePath = path.join(process.cwd(), 'uploads', fileData.slug);
+            res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+            res.setHeader('Access-Control-Allow-Origin', '*');
             res.sendFile(filePath);
         } catch (error) {
             next(error);

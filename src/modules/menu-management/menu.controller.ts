@@ -48,4 +48,13 @@ export class MenuController implements IMenuController {
             next(error);
         }
     };
+
+    reorder_menu = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        try {
+            const response = await this.service.reorder_menu(req.body);
+            res.status(200).json({ success: true, message: 'Menu order updated', data: response });
+        } catch (error) {
+            next(error);
+        }
+    };
 }

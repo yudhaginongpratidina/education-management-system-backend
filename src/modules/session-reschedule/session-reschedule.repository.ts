@@ -66,12 +66,12 @@ export class SessionRescheduleRepository implements ISessionRescheduleRepository
                 sr.*,
                 c.name AS class_name,
                 s.full_name AS student_name,
-                fs.scheduled_date AS from_date,
-                fs.start_time AS from_start_time,
-                fs.end_time AS from_end_time,
-                ts.scheduled_date AS to_date,
-                ts.start_time AS to_start_time,
-                ts.end_time AS to_end_time,
+                fs.scheduled_date AS \`from_date\`,
+                fs.start_time AS \`from_start_time\`,
+                fs.end_time AS \`from_end_time\`,
+                ts.scheduled_date AS \`to_date\`,
+                ts.start_time AS \`to_start_time\`,
+                ts.end_time AS \`to_end_time\`,
                 ft.full_name AS from_teacher_name,
                 tt.full_name AS to_teacher_name
             FROM session_reschedules sr

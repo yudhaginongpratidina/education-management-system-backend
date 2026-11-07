@@ -68,6 +68,7 @@ export interface ITeacherService {
         still_actively_working: boolean;
     }): Promise<any>;
     delete_teacher(slug: string): Promise<any>;
+    reset_password(slug: string, newPassword?: string): Promise<any>;
 }
 
 export interface ITeacherController {
@@ -75,4 +76,5 @@ export interface ITeacherController {
     get_teacher(req: Request, res: Response, next: NextFunction): Promise<void>;
     update_teacher(req: Request, res: Response, next: NextFunction): Promise<void>;
     delete_teacher(req: Request, res: Response, next: NextFunction): Promise<void>;
+    reset_password(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

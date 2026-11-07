@@ -28,6 +28,14 @@ export const DEFAULT_BANYAN_THEME: AppThemeConfig = {
     buttonStyle: 'gradient',
     shadowStyle: 'soft',
     fontFamily: 'plus-jakarta',
+    logo: {
+        url: '',
+        darkUrl: '',
+        text: 'BANYAN',
+        subtitle: 'Bimbel Management',
+        type: 'image_text',
+        iconName: 'mdi:school',
+    },
 };
 
 export class ThemeService implements IThemeService {
@@ -44,6 +52,10 @@ export class ThemeService implements IThemeService {
             colors: {
                 ...DEFAULT_BANYAN_THEME.colors,
                 ...theme.config.colors,
+            },
+            logo: {
+                ...DEFAULT_BANYAN_THEME.logo,
+                ...(theme.config.logo ?? {}),
             },
         };
     }
@@ -67,6 +79,10 @@ export class ThemeService implements IThemeService {
             buttonStyle: themeConfig.buttonStyle ?? current.buttonStyle ?? 'gradient',
             shadowStyle: themeConfig.shadowStyle ?? current.shadowStyle ?? 'soft',
             fontFamily: themeConfig.fontFamily ?? current.fontFamily ?? 'plus-jakarta',
+            logo: {
+                ...current.logo,
+                ...(themeConfig.logo ?? {}),
+            },
         };
 
         const saved = await this.repository.saveTheme('default', merged.themeName, merged, userId);

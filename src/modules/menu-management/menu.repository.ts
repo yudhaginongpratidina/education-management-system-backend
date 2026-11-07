@@ -103,4 +103,23 @@ export class MenuRepository implements IMenuRepository {
         const result = await this.db.query(query, [slug]);
         return result;
     }
+
+    async reorder_menu(
+        orders: { id: number; sort_order: number; parent_id?: number | null }[],
+    ): Promise<any> {
+        for (const item of orders) {
+            if (item.parent_id !== undefined) {
+                await this.db.query(
+                    'UPDATE menus SET sort_order = ?, parent_id = ? WHERE id = ?;',
+                    [item.sort_order, item.parent_id, item.id],
+                );
+            } else {
+                await this.db.query('UPDATE menus SET sort_order = ? WHERE id = ?;', [
+                    item.sort_order,
+                    item.id,
+                ]);
+            }
+        }
+        return true;
+    }
 }

@@ -33,5 +33,15 @@ export const updateThemeSchema = z.object({
         buttonStyle: z.enum(['gradient', 'solid', 'soft', 'outline']).optional().default('gradient'),
         shadowStyle: z.enum(['none', 'soft', 'medium', 'strong']).optional().default('soft'),
         fontFamily: z.string().min(1).max(50).optional().default('plus-jakarta'),
+        logo: z
+            .object({
+                url: z.string().optional().default(''),
+                darkUrl: z.string().optional().default(''),
+                text: z.string().max(100).optional().default('BANYAN'),
+                subtitle: z.string().max(150).optional().default('Bimbel Management'),
+                type: z.enum(['image', 'text', 'image_text', 'icon']).optional().default('image_text'),
+                iconName: z.string().max(100).optional().default('mdi:school'),
+            })
+            .optional(),
     }),
 });

@@ -42,6 +42,9 @@ export interface IMenuRepository {
     }): Promise<any>;
 
     delete_menu(slug: string): Promise<any>;
+    reorder_menu(
+        orders: { id: number; sort_order: number; parent_id?: number | null }[],
+    ): Promise<any>;
 }
 
 export interface IMenuService {
@@ -84,6 +87,10 @@ export interface IMenuService {
     }): Promise<any>;
 
     delete_menu(slug: string): Promise<any>;
+    reorder_menu(data: {
+        orders?: { id: number; sort_order: number; parent_id?: number | null }[];
+        ids?: number[];
+    }): Promise<any>;
 }
 
 export interface IMenuController {
@@ -91,4 +98,5 @@ export interface IMenuController {
     update_menu(req: Request, res: Response, next: NextFunction): Promise<any>;
     get_menu(req: Request, res: Response, next: NextFunction): Promise<any>;
     delete_menu(req: Request, res: Response, next: NextFunction): Promise<any>;
+    reorder_menu(req: Request, res: Response, next: NextFunction): Promise<any>;
 }

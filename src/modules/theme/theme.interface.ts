@@ -21,6 +21,15 @@ export interface ThemeColors {
     sidebarPrimary?: string;
 }
 
+export interface ThemeLogo {
+    url?: string;
+    darkUrl?: string;
+    text?: string;
+    subtitle?: string;
+    type?: 'image' | 'text' | 'image_text' | 'icon';
+    iconName?: string;
+}
+
 export interface AppThemeConfig {
     preset: string;
     themeName: string;
@@ -30,6 +39,7 @@ export interface AppThemeConfig {
     buttonStyle: 'gradient' | 'solid' | 'soft' | 'outline';
     shadowStyle: 'none' | 'soft' | 'medium' | 'strong';
     fontFamily: string;
+    logo?: ThemeLogo;
 }
 
 export interface AppThemeEntity {
@@ -65,4 +75,5 @@ export interface IThemeController {
     getTheme: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     updateTheme: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     resetTheme: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+    uploadLogo: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 }
