@@ -2,7 +2,11 @@ import type { IStudentRepository, Student, AssignStudentProgramDTO } from './stu
 import { HttpError } from '../../core/errors/http.error';
 import { ErrorCodes } from '../../core/errors/error-codes';
 import { StudentExcelHelper, type ParsedStudentRow } from './student.excel';
-import { computeEndedAt, computeTotalSessions, type SessionPeriod } from '../student-program/student-program.util';
+import {
+    computeEndedAt,
+    computeTotalSessions,
+    type SessionPeriod,
+} from '../student-program/student-program.util';
 
 export class StudentService {
     constructor(private readonly studentRepository: IStudentRepository) {}
@@ -121,9 +125,7 @@ export class StudentService {
     async importStudents(
         students: Omit<Student, 'id' | 'created_at' | 'updated_at'>[],
     ): Promise<{ imported_count: number }> {
-        const validStudents = students.filter(
-            (s) => s.full_name && s.full_name.trim().length > 0,
-        );
+        const validStudents = students.filter((s) => s.full_name && s.full_name.trim().length > 0);
 
         const seenNames = new Set<string>();
         for (const student of validStudents) {
@@ -151,7 +153,12 @@ export class StudentService {
 
     async assignProgram(dto: AssignStudentProgramDTO): Promise<any[]> {
         if (!dto.student_ids || dto.student_ids.length === 0) {
-            throw new HttpError(400, 'Minimal pilih satu siswa untuk di-assign', ErrorCodes.BAD_REQUEST, true);
+            throw new HttpError(
+                400,
+                'Minimal pilih satu siswa untuk di-assign',
+                ErrorCodes.BAD_REQUEST,
+                true,
+            );
         }
 
         const pkg = await this.studentRepository.getDefaultPackageByProgramOrLevel({
@@ -161,7 +168,12 @@ export class StudentService {
         });
 
         if (!pkg && !dto.program_package_id) {
-            throw new HttpError(400, 'Paket program tidak ditemukan untuk level yang dipilih', ErrorCodes.BAD_REQUEST, true);
+            throw new HttpError(
+                400,
+                'Paket program tidak ditemukan untuk level yang dipilih',
+                ErrorCodes.BAD_REQUEST,
+                true,
+            );
         }
 
         const packageId = dto.program_package_id || pkg?.id;
@@ -181,9 +193,13 @@ export class StudentService {
               : undefined;
 
         const normalPrice =
-            dto.normal_price !== undefined ? Number(dto.normal_price) : Number(pkg?.normal_price ?? 0);
+            dto.normal_price !== undefined
+                ? Number(dto.normal_price)
+                : Number(pkg?.normal_price ?? 0);
         const sellingPrice =
-            dto.selling_price !== undefined ? Number(dto.selling_price) : Number(pkg?.selling_price ?? 0);
+            dto.selling_price !== undefined
+                ? Number(dto.selling_price)
+                : Number(pkg?.selling_price ?? 0);
 
         const results: any[] = [];
         for (const studentId of dto.student_ids) {

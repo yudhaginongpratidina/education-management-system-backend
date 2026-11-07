@@ -33,7 +33,10 @@ export const updateManualAttendanceSchema = z.object({
     body: z.object({
         teacher_id: z.coerce.number().positive().optional(),
         branch_id: z.coerce.number().positive().optional(),
-        attendance_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+        attendance_date: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/)
+            .optional(),
         status: statusEnum.optional(),
         check_in_at: z.string().nullable().optional(),
         check_in_photo: z.string().nullable().optional(),

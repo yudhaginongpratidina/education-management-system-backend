@@ -47,6 +47,7 @@ import { cashflowModule } from '../modules/cashflow/index';
 import { assetModule } from '../modules/asset/index';
 import { themeModule } from '../modules/theme/index';
 import { manualAttendanceModule } from '../modules/manual-attendance/index';
+import { backupModule } from '../modules/backup/index';
 
 const modules: Module[] = [
     roleModule,
@@ -61,6 +62,7 @@ const modules: Module[] = [
     teacherModule,
     teacherProgramModule,
     storageModule,
+    backupModule,
     teacherBranchModule,
     teacherAvailabilityModule,
     teacherAttendanceModule,

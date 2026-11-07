@@ -34,7 +34,8 @@ export class BranchService implements IBranchService {
             slug,
             address: data.address === '' || data.address === undefined ? null : data.address,
             latitude: data.latitude === '' || data.latitude === undefined ? null : data.latitude,
-            longitude: data.longitude === '' || data.longitude === undefined ? null : data.longitude,
+            longitude:
+                data.longitude === '' || data.longitude === undefined ? null : data.longitude,
             radius: data.radius === '' || data.radius === undefined ? null : data.radius,
         });
     }

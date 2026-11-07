@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import { createWriteStream } from 'fs';
 import path from 'path';
+import os from 'os';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const archiver = require('archiver');
@@ -52,7 +53,7 @@ export class StorageService implements IStorageService {
     }
 
     async backup(): Promise<string> {
-        const backupPath = path.join('uploads', `backup-${Date.now()}.zip`);
+        const backupPath = path.join(os.tmpdir(), `backup-${Date.now()}.zip`);
         const output = createWriteStream(backupPath);
 
         // Correct way to instantiate archiver in this version
@@ -65,20 +66,6 @@ export class StorageService implements IStorageService {
             archive.directory('uploads', false);
             archive.finalize();
         });
-
-        // Clean up uploads folder except .gitignore
-        const files = await fs.readdir('uploads');
-        for (const file of files) {
-            if (file !== '.gitignore' && file !== path.basename(backupPath)) {
-                const filePath = path.join('uploads', file);
-                const stats = await fs.lstat(filePath);
-                if (stats.isDirectory()) {
-                    await fs.rm(filePath, { recursive: true });
-                } else {
-                    await fs.unlink(filePath);
-                }
-            }
-        }
 
         return backupPath;
     }

@@ -33,7 +33,9 @@ export class ManualAttendanceService implements IManualAttendanceService {
         }
 
         // Prefix notes with manual info if not already there
-        const adminTag = adminUserId ? `[Manual by SuperAdmin #${adminUserId}]` : '[Manual by SuperAdmin]';
+        const adminTag = adminUserId
+            ? `[Manual by SuperAdmin #${adminUserId}]`
+            : '[Manual by SuperAdmin]';
         const finalNotes = data.notes
             ? data.notes.includes('Manual by SuperAdmin')
                 ? data.notes
@@ -84,8 +86,12 @@ export class ManualAttendanceService implements IManualAttendanceService {
 
         let finalNotes = data.notes;
         if (data.notes !== undefined && data.notes !== null) {
-            const adminTag = adminUserId ? `[Updated by SuperAdmin #${adminUserId}]` : '[Updated by SuperAdmin]';
-            finalNotes = data.notes.includes('SuperAdmin') ? data.notes : `${adminTag} ${data.notes}`;
+            const adminTag = adminUserId
+                ? `[Updated by SuperAdmin #${adminUserId}]`
+                : '[Updated by SuperAdmin]';
+            finalNotes = data.notes.includes('SuperAdmin')
+                ? data.notes
+                : `${adminTag} ${data.notes}`;
             finalNotes = finalNotes.slice(0, 255);
         }
 

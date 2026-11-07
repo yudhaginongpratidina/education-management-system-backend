@@ -55,7 +55,8 @@ export class ThemeController implements IThemeController {
     uploadLogo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
-            const singleFile = req.file || files?.logo?.[0] || files?.file?.[0] || files?.image?.[0];
+            const singleFile =
+                req.file || files?.logo?.[0] || files?.file?.[0] || files?.image?.[0];
 
             if (!singleFile) {
                 res.status(400).json({ success: false, message: 'No file uploaded' });

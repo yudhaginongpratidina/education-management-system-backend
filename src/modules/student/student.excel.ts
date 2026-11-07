@@ -184,7 +184,9 @@ export class StudentExcelHelper {
     /**
      * Parse student records from an uploaded Excel file buffer
      */
-    static async parseExcel(buffer: Buffer): Promise<Omit<ParsedStudentRow, 'status' | 'errors'>[]> {
+    static async parseExcel(
+        buffer: Buffer,
+    ): Promise<Omit<ParsedStudentRow, 'status' | 'errors'>[]> {
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(buffer as any);
 
@@ -202,13 +204,22 @@ export class StudentExcelHelper {
                 .trim()
                 .replace(/[^a-z0-9_]/g, '');
 
-            if (val.includes('namalengkap') || val === 'nama' || val === 'fullname' || val === 'name') {
+            if (
+                val.includes('namalengkap') ||
+                val === 'nama' ||
+                val === 'fullname' ||
+                val === 'name'
+            ) {
                 headers[colNumber] = 'full_name';
             } else if (val.includes('jenjang') || val.includes('schoollevel')) {
                 headers[colNumber] = 'school_level';
             } else if (val.includes('tempatlahir') || val.includes('placebirth')) {
                 headers[colNumber] = 'place_birth';
-            } else if (val.includes('tanggallahir') || val.includes('birthdate') || val.includes('tgllahir')) {
+            } else if (
+                val.includes('tanggallahir') ||
+                val.includes('birthdate') ||
+                val.includes('tgllahir')
+            ) {
                 headers[colNumber] = 'birth_date';
             } else if (val.includes('alamat') || val.includes('address')) {
                 headers[colNumber] = 'address';
@@ -240,7 +251,13 @@ export class StudentExcelHelper {
         for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber++) {
             const row = worksheet.getRow(rowNumber);
             // Skip empty rows
-            const hasValues = row.values && (Array.isArray(row.values) ? row.values.some((v) => v !== null && v !== undefined && String(v).trim() !== '') : false);
+            const hasValues =
+                row.values &&
+                (Array.isArray(row.values)
+                    ? row.values.some(
+                          (v) => v !== null && v !== undefined && String(v).trim() !== '',
+                      )
+                    : false);
             if (!hasValues) continue;
 
             const rowData: Record<string, any> = {};
@@ -292,20 +309,26 @@ export class StudentExcelHelper {
             // Normalize boolean photo permission
             let photoPerm = false;
             if (rowData.photos_of_children_may_be_posted !== undefined) {
-                const rawVal = String(rowData.photos_of_children_may_be_posted).toLowerCase().trim();
+                const rawVal = String(rowData.photos_of_children_may_be_posted)
+                    .toLowerCase()
+                    .trim();
                 photoPerm = ['ya', 'yes', 'true', '1', 'boleh', 'ijin', 'izin'].includes(rawVal);
             }
 
             rows.push({
                 row_number: rowNumber,
                 full_name: fullName,
-                school_level: rowData.school_level ? String(rowData.school_level).trim() : undefined,
+                school_level: rowData.school_level
+                    ? String(rowData.school_level).trim()
+                    : undefined,
                 place_birth: rowData.place_birth ? String(rowData.place_birth).trim() : undefined,
                 birth_date: birthDateStr,
                 address: rowData.address ? String(rowData.address).trim() : undefined,
                 father_name: rowData.father_name ? String(rowData.father_name).trim() : undefined,
                 mother_name: rowData.mother_name ? String(rowData.mother_name).trim() : undefined,
-                guardian_name: rowData.guardian_name ? String(rowData.guardian_name).trim() : undefined,
+                guardian_name: rowData.guardian_name
+                    ? String(rowData.guardian_name).trim()
+                    : undefined,
                 guardian_phone_number: rowData.guardian_phone_number
                     ? String(rowData.guardian_phone_number).trim()
                     : undefined,

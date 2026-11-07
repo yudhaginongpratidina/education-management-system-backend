@@ -283,8 +283,7 @@ export class ReportService implements IReportService {
             if (!photo || photo === '-' || photo === 'null' || photo.trim() === '') return '-';
             const trimmed = photo.trim();
             if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
-            const baseUrl =
-                process.env.APP_URL || process.env.API_URL || 'http://localhost:4000';
+            const baseUrl = process.env.APP_URL || process.env.API_URL || 'http://localhost:4000';
             const clean = trimmed.startsWith('/storage/')
                 ? trimmed.replace('/storage/', '')
                 : trimmed.replace(/^\/+/, '');

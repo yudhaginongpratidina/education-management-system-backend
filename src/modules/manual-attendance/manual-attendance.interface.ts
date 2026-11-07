@@ -1,14 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 
 export type AttendanceStatus =
-    | 'PRESENT'
-    | 'ABSENT'
-    | 'SICK'
-    | 'LEAVE'
-    | 'REMOTE'
-    | 'OFFICIAL_DUTY'
-    | 'HOLIDAY'
-    | 'LATE';
+    'PRESENT' | 'ABSENT' | 'SICK' | 'LEAVE' | 'REMOTE' | 'OFFICIAL_DUTY' | 'HOLIDAY' | 'LATE';
 
 export interface IManualAttendanceInput {
     teacher_id: number;
@@ -65,10 +58,17 @@ export interface IManualAttendanceRepository {
 }
 
 export interface IManualAttendanceService {
-    record(data: IManualAttendanceInput, adminUserId?: number | null): Promise<IManualAttendanceRecord>;
+    record(
+        data: IManualAttendanceInput,
+        adminUserId?: number | null,
+    ): Promise<IManualAttendanceRecord>;
     get(filter: IManualAttendanceFilter): Promise<IManualAttendanceRecord[]>;
     getById(id: number): Promise<IManualAttendanceRecord>;
-    update(id: number, data: Partial<IManualAttendanceInput>, adminUserId?: number | null): Promise<IManualAttendanceRecord>;
+    update(
+        id: number,
+        data: Partial<IManualAttendanceInput>,
+        adminUserId?: number | null,
+    ): Promise<IManualAttendanceRecord>;
     delete(id: number): Promise<void>;
 }
 

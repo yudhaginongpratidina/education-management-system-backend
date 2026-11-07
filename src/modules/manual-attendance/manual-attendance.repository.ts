@@ -61,7 +61,7 @@ export class ManualAttendanceRepository implements IManualAttendanceRepository {
             formatToMySqlDateTime(data.check_out_at),
             data.check_out_photo ?? null,
             data.notes ?? null,
-            data.is_approved ?? true ? 1 : 0,
+            (data.is_approved ?? true) ? 1 : 0,
         ];
 
         await this.db.query(insertQuery, values);
@@ -164,7 +164,10 @@ export class ManualAttendanceRepository implements IManualAttendanceRepository {
         };
     }
 
-    async update(id: number, data: Partial<IManualAttendanceInput>): Promise<IManualAttendanceRecord> {
+    async update(
+        id: number,
+        data: Partial<IManualAttendanceInput>,
+    ): Promise<IManualAttendanceRecord> {
         const updates: string[] = [];
         const values: unknown[] = [];
 

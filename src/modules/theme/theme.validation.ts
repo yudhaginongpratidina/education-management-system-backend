@@ -30,7 +30,10 @@ export const updateThemeSchema = z.object({
             .passthrough(),
         radius: z.string().min(1).max(20).optional().default('0.25rem'),
         radiusScale: z.enum(['none', 'sm', 'md', 'lg', 'xl']).optional().default('sm'),
-        buttonStyle: z.enum(['gradient', 'solid', 'soft', 'outline']).optional().default('gradient'),
+        buttonStyle: z
+            .enum(['gradient', 'solid', 'soft', 'outline'])
+            .optional()
+            .default('gradient'),
         shadowStyle: z.enum(['none', 'soft', 'medium', 'strong']).optional().default('soft'),
         fontFamily: z.string().min(1).max(50).optional().default('plus-jakarta'),
         logo: z
@@ -39,7 +42,10 @@ export const updateThemeSchema = z.object({
                 darkUrl: z.string().optional().default(''),
                 text: z.string().max(100).optional().default('BANYAN'),
                 subtitle: z.string().max(150).optional().default('Bimbel Management'),
-                type: z.enum(['image', 'text', 'image_text', 'icon']).optional().default('image_text'),
+                type: z
+                    .enum(['image', 'text', 'image_text', 'icon'])
+                    .optional()
+                    .default('image_text'),
                 iconName: z.string().max(100).optional().default('mdi:school'),
             })
             .optional(),

@@ -29,11 +29,7 @@ export class StudentRoutes {
             asyncHandler(this.studentController.previewImport),
         );
 
-        router.post(
-            '/import',
-            upload.single('file'),
-            asyncHandler(this.studentController.import),
-        );
+        router.post('/import', upload.single('file'), asyncHandler(this.studentController.import));
 
         router.post('/assign', asyncHandler(this.studentController.assign));
 

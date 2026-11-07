@@ -85,8 +85,7 @@ export class LandingCmsController implements ILandingCmsController {
         try {
             const file =
                 req.file ||
-                (req.files &&
-                    ((req.files as any).image?.[0] || (req.files as any).file?.[0]));
+                (req.files && ((req.files as any).image?.[0] || (req.files as any).file?.[0]));
 
             if (!file) {
                 res.status(400).json({ success: false, message: 'File gambar wajib diunggah' });
