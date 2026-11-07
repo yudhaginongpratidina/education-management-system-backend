@@ -37,6 +37,7 @@ export class StudentRoutes {
 
         router.post('/assign', asyncHandler(this.studentController.assign));
 
+        router.get('/check-name', asyncHandler(this.studentController.checkName));
         router.get('/:id', asyncHandler(this.studentController.findById));
         router.post(
             '/',

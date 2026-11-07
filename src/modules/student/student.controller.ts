@@ -21,6 +21,18 @@ export class StudentController {
         res.json(student);
     };
 
+    checkName = async (req: Request, res: Response) => {
+        const name = (req.query.name as string) || '';
+        if (!name || name.trim().length === 0) {
+            return res.json({ exists: false, data: null });
+        }
+        const student = await this.studentService.findStudentByName(name.trim());
+        return res.json({
+            exists: !!student,
+            data: student || null,
+        });
+    };
+
     update = async (req: Request, res: Response) => {
         const student = await this.studentService.updateStudent(Number(req.params.id), req.body);
         if (!student) return res.status(404).json({ message: 'Student not found' });

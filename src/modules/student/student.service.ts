@@ -35,6 +35,10 @@ export class StudentService {
         return await this.studentRepository.findById(id);
     }
 
+    async findStudentByName(full_name: string): Promise<Student | null> {
+        return await this.studentRepository.findByFullName(full_name);
+    }
+
     async updateStudent(
         id: number,
         data: Partial<Omit<Student, 'id' | 'created_at' | 'updated_at'>>,

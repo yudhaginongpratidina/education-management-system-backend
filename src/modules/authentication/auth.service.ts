@@ -36,7 +36,10 @@ export class AuthService implements IAuthService {
         const { access_token } = generate_tokens(user.id.toString(), user.role);
         return {
             user: {
+                id: user.id,
+                full_name: user.full_name,
                 email: user.email,
+                role: user.role,
                 avatar: user.avatar || null,
             },
             access_token,
@@ -46,7 +49,8 @@ export class AuthService implements IAuthService {
     async me(user_id: string): Promise<any> {
         const user = await this.repo.find_user_by_id(user_id);
         if (!user) throw new HttpError(404, 'User not found', 'USER_NOT_FOUND', true);
-        return user;
+        const { password_hash: _pass, ...rest } = user;
+        return rest;
     }
 
     async change_password(user_id: string, password: string): Promise<any> {
