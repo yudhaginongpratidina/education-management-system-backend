@@ -47,7 +47,8 @@ INSERT INTO `menus` (`id`, `parent_id`, `name`, `slug`, `type`, `icon`, `url`, `
 (33, NULL, 'Cashflow', 'cashflow', 'ITEM', '', '/cashflow', '-', 26, 1, '2026-10-05 00:35:42', '2026-10-05 00:35:42'),
 (34, NULL, 'Manajemen Aset', 'manajemen-aset', 'ITEM', '', '/asset-management', '-', 27, 1, '2026-10-05 00:36:37', '2026-10-05 00:36:37'),
 (35, NULL, 'Manual Penggunaan', 'manual-penggunaan', 'ITEM', '', '/guide', '-', 28, 1, '2026-10-05 00:37:12', '2026-10-05 00:37:12'),
-(36, NULL, 'Sesi Saya', 'sesi-saya', 'ITEM', '', '/my-sessions', '-', 29, 1, '2026-10-05 00:37:38', '2026-10-05 00:37:38')
+(36, NULL, 'Sesi Saya', 'sesi-saya', 'ITEM', '', '/my-sessions', '-', 29, 1, '2026-10-05 00:37:38', '2026-10-05 00:37:38'),
+(37, 12, 'Tema & Tampilan', 'theme-settings', 'ITEM', 'mdi:palette-outline', '/theme-settings', 'Kustomisasi tema dan tampilan', 30, 1, '2026-11-07 15:00:00', '2026-11-07 15:00:00')
 ON DUPLICATE KEY UPDATE
     `parent_id` = VALUES(`parent_id`),
     `name` = VALUES(`name`),
@@ -66,9 +67,9 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO `role_menus` (`role_id`, `menu_id`) VALUES
 (7, 1), (7, 8), (7, 9), (7, 11), (7, 12), (7, 13), (7, 14), (7, 15), (7, 16),
 (7, 17), (7, 18), (7, 19), (7, 20), (7, 24), (7, 25), (7, 26), (7, 27), (7, 28),
-(7, 29), (7, 30), (7, 31), (7, 32), (7, 33), (7, 34), (7, 35),
+(7, 29), (7, 30), (7, 31), (7, 32), (7, 33), (7, 34), (7, 35), (7, 37),
 (11, 1), (11, 18), (11, 19), (11, 21), (11, 22), (11, 23), (11, 27), (11, 30),
-(11, 32), (11, 35), (11, 36)
+(11, 32), (11, 35), (11, 36), (11, 37)
 ON DUPLICATE KEY UPDATE
     `role_id` = VALUES(`role_id`),
     `menu_id` = VALUES(`menu_id`);

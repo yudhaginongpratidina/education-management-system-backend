@@ -45,6 +45,7 @@ import { landingCmsModule } from '../modules/landing-cms/index';
 import { reportModule } from '../modules/report/index';
 import { cashflowModule } from '../modules/cashflow/index';
 import { assetModule } from '../modules/asset/index';
+import { themeModule } from '../modules/theme/index';
 
 const modules: Module[] = [
     roleModule,
@@ -78,6 +79,7 @@ const modules: Module[] = [
     reportModule,
     cashflowModule,
     assetModule,
+    themeModule,
 ];
 
 // STRATEGY CONFIG

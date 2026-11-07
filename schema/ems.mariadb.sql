@@ -790,3 +790,21 @@ CREATE TABLE asset_movements (
         ON DELETE SET NULL
         ON UPDATE CASCADE
 );
+
+-- ============================================================
+-- APP THEMES
+-- ============================================================
+CREATE TABLE IF NOT EXISTS app_themes (
+    id VARCHAR(50) NOT NULL DEFAULT 'default',
+    theme_name VARCHAR(100) NOT NULL DEFAULT 'BANYAN',
+    config LONGTEXT NOT NULL,
+    updated_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_app_themes_user
+        FOREIGN KEY (updated_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
