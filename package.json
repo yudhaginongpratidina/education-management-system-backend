@@ -8,6 +8,7 @@
         "dev": "bun --watch ./src/server.ts",
         "start": "bun ./dist/server.js",
         "migrate": "bun ./scripts/migrate.ts",
+        "seed": "bun ./scripts/seed.ts",
         "format": "prettier . --write",
         "format:check": "prettier . --check"
     },

@@ -11,7 +11,7 @@ CREATE TABLE roles (
     PRIMARY KEY (id),
     UNIQUE KEY uq_roles_name (name),
     UNIQUE KEY uq_roles_slug (slug)
-)
+);
 
 -- ============================================================
 -- TABEL MENU MANAGEMENT
@@ -49,7 +49,7 @@ CREATE TABLE role_menus (
     INDEX idx_role_menus_menu_id (menu_id),
     CONSTRAINT fk_role_menus_role FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_role_menus_menu FOREIGN KEY (menu_id) REFERENCES menus (id) ON DELETE CASCADE ON UPDATE CASCADE
-)
+);
 
 -- ============================================================
 -- TABEL USER MANAGEMENT
@@ -69,7 +69,7 @@ CREATE TABLE users (
     UNIQUE KEY uq_users_email (email),
     UNIQUE KEY uq_users_slug (slug),
     INDEX idx_users_role (role)
-)
+);
 
 -- ============================================================
 -- TABEL PROGRAM MANAGEMENT
@@ -184,7 +184,7 @@ CREATE TABLE teachers (
     UNIQUE KEY uq_teachers_slug (slug),
     INDEX idx_teachers_user_id (user_id),
     CONSTRAINT fk_teachers_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)
+);
 
 -- ============================================================
 -- TABEL GURU PROGRAM MANAGEMENT
@@ -198,7 +198,7 @@ CREATE TABLE teacher_programs (
     INDEX idx_teacher_programs_program_id (program_id),
     CONSTRAINT fk_teacher_programs_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE,
     CONSTRAINT fk_teacher_programs_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE
-)
+);
 
 -- ============================================================
 -- TABEL GURU AVAILABILITY MANAGEMENT
@@ -218,7 +218,7 @@ CREATE TABLE teacher_availability (
     PRIMARY KEY (id),
     INDEX idx_teacher_availability_teacher_id (teacher_id),
     CONSTRAINT fk_teacher_availability_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
-)
+);
 
 -- ============================================================
 -- TABEL GURU ASSIGNMENT BRANCH MANAGEMENT
@@ -231,7 +231,7 @@ CREATE TABLE teacher_branches (
     INDEX idx_teacher_branches_branch_id (branch_id),
     CONSTRAINT fk_teacher_branches_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE,
     CONSTRAINT fk_teacher_branches_branch FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
-)
+);
 
 -- ============================================================
 -- TEACHER ATTANDENT MANAGEMENT
