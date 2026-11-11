@@ -144,6 +144,11 @@ export class SessionRoutes {
         );
 
         // ---------- student reschedule ----------
+        router.get(
+            '/:sessionId/students/:studentProgramId/reschedule-targets',
+            validate(sessionStudentParamsSchema),
+            asyncHandler(this.controller.getRescheduleTargets),
+        );
         router.post(
             '/:sessionId/students/:studentProgramId/reschedule',
             validate(rescheduleStudentSchema),

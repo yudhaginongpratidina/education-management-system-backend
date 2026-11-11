@@ -103,7 +103,44 @@ export class StudentProgramService {
               )
             : data;
 
-        return await this.repository.update(id, prepared);
+        const updated = await this.repository.update(id, prepared);
+
+        // When status is changed and is one of ACTIVE, ON_LEAVE, INACTIVE:
+        // Synchronize all other programs belonging to this student!
+        if (
+            data.status &&
+            data.status !== existing.status &&
+            ['ACTIVE', 'ON_LEAVE', 'INACTIVE'].includes(data.status)
+        ) {
+            await this.repository.syncStatusToAllPrograms(
+                existing.student_id,
+                data.status,
+                data.leave_until ? String(data.leave_until).slice(0, 10) : null,
+                data.last_active_at ? String(data.last_active_at).slice(0, 10) : null,
+            );
+
+            try {
+                await this.repository.recordStatusHistory({
+                    student_id: existing.student_id,
+                    student_program_id: id,
+                    status: data.status,
+                    start_date: new Date().toISOString().slice(0, 10),
+                    end_date:
+                        data.status === 'ON_LEAVE'
+                            ? data.leave_until
+                                ? String(data.leave_until).slice(0, 10)
+                                : null
+                            : null,
+                    reason: `Perubahan status program (${existing.program_package?.name || 'Program'})`,
+                    change_type: 'MANUAL',
+                    notes: `Status seluruh program siswa disinkronkan menjadi ${data.status}.`,
+                });
+            } catch {
+                // Ignore history recording error if any
+            }
+        }
+
+        return updated;
     }
 
     async delete(id: number): Promise<void> {

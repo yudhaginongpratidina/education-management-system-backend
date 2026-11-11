@@ -33,6 +33,13 @@ export class StudentRoutes {
 
         router.post('/assign', asyncHandler(this.studentController.assign));
 
+        router.get('/:id/status-history', asyncHandler(this.studentController.getStatusHistory));
+        router.post('/:id/status-history', asyncHandler(this.studentController.addStatusHistory));
+        router.delete(
+            '/:id/status-history/:historyId',
+            asyncHandler(this.studentController.deleteStatusHistory),
+        );
+
         router.get('/check-name', asyncHandler(this.studentController.checkName));
         router.get('/:id', asyncHandler(this.studentController.findById));
         router.post(

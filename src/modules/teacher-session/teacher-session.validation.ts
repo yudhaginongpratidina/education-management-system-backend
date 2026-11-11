@@ -47,7 +47,7 @@ export const teacherSessionStatusSchema = z.object({
 export const teacherAttendanceSchema = z.object({
     params: z.object({ id: idParam, studentProgramId: idParam }),
     body: z.object({
-        attendance_status: attendanceStatusSchema,
+        attendance_status: attendanceStatusSchema.nullable(),
         notes: z.string().max(500).optional().nullable(),
     }),
 });
@@ -59,7 +59,7 @@ export const teacherBulkAttendanceSchema = z.object({
             .array(
                 z.object({
                     student_program_id: z.number().int().positive(),
-                    attendance_status: attendanceStatusSchema,
+                    attendance_status: attendanceStatusSchema.nullable().optional(),
                     notes: z.string().max(500).optional().nullable(),
                 }),
             )

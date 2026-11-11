@@ -28,6 +28,16 @@ export interface ThemeLogo {
     subtitle?: string;
     type?: 'image' | 'text' | 'image_text' | 'icon';
     iconName?: string;
+    hasBorder?: boolean;
+    borderWidth?: number | string;
+    borderColor?: string;
+    borderStyle?: 'solid' | 'dashed' | 'dotted';
+    borderRadius?: string;
+    padding?: number | string;
+    hasBackground?: boolean;
+    backgroundColor?: string;
+    aspectRatio?: 'square' | 'wide' | 'auto';
+    imageFit?: 'contain' | 'cover';
 }
 
 export interface AppThemeConfig {

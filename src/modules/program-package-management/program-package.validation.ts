@@ -14,5 +14,6 @@ export const programPackageSchema = z.object({
             .min(0, 'Bonus duration must be 0 or greater')
             .optional(),
         status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
+        program_slug: z.string().optional(),
     }),
 });

@@ -233,11 +233,13 @@ export class TeacherSessionService implements ITeacherSessionService {
         userId: number,
         sessionId: number,
         studentProgramId: number,
-        data: { attendance_status: SessionAttendanceStatus; notes?: string | null },
+        data: { attendance_status?: SessionAttendanceStatus | null; notes?: string | null },
     ): Promise<any> {
         const session = await this.getOwnedSessionOrFail(userId, sessionId);
         this.assertSessionAcceptsAttendance(session);
-        this.assertValidAttendance(data.attendance_status);
+        if (data.attendance_status) {
+            this.assertValidAttendance(data.attendance_status);
+        }
 
         const participant = await this.sessionStudentRepository.findParticipant(
             sessionId,
@@ -253,7 +255,7 @@ export class TeacherSessionService implements ITeacherSessionService {
         }
 
         return await this.sessionStudentRepository.update(sessionId, studentProgramId, {
-            attendance_status: data.attendance_status,
+            attendance_status: data.attendance_status ?? null,
             notes: data.notes,
         });
     }
@@ -263,7 +265,7 @@ export class TeacherSessionService implements ITeacherSessionService {
         sessionId: number,
         records: {
             student_program_id: number;
-            attendance_status: SessionAttendanceStatus;
+            attendance_status?: SessionAttendanceStatus | null;
             notes?: string | null;
         }[],
     ): Promise<any[]> {
@@ -271,7 +273,9 @@ export class TeacherSessionService implements ITeacherSessionService {
         this.assertSessionAcceptsAttendance(session);
 
         for (const record of records) {
-            this.assertValidAttendance(record.attendance_status);
+            if (record.attendance_status) {
+                this.assertValidAttendance(record.attendance_status);
+            }
             const participant = await this.sessionStudentRepository.findParticipant(
                 sessionId,
                 record.student_program_id,
@@ -294,7 +298,7 @@ export class TeacherSessionService implements ITeacherSessionService {
                         sessionId,
                         record.student_program_id,
                         {
-                            attendance_status: record.attendance_status,
+                            attendance_status: record.attendance_status ?? null,
                             notes: record.notes,
                         },
                         tx,

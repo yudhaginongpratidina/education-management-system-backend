@@ -381,6 +381,9 @@ export class ReportService implements IReportService {
         const summarySheet = workbook.addWorksheet('Rekap Siswa');
         summarySheet.columns = [
             { header: 'Siswa', key: 'student_name', width: 28 },
+            { header: 'Status Siswa', key: 'student_status', width: 16 },
+            { header: 'Mulai Belajar', key: 'started_at', width: 16 },
+            { header: 'Terakhir Aktif', key: 'last_active_at', width: 16 },
             { header: 'Cabang', key: 'branch_name', width: 22 },
             { header: 'Total', key: 'total', width: 10 },
             { header: 'Hadir', key: 'present', width: 10 },
@@ -390,7 +393,29 @@ export class ReportService implements IReportService {
             { header: 'Reschedule', key: 'rescheduled', width: 12 },
             { header: 'Kehadiran (%)', key: 'rate', width: 15 },
         ];
-        summarySheet.addRows(summary.data);
+        summarySheet.addRows(
+            summary.data.map((row: any) => ({
+                ...row,
+                student_status:
+                    row.student_status === 'ACTIVE'
+                        ? 'Aktif'
+                        : row.student_status === 'ON_LEAVE'
+                          ? `Cuti${row.leave_until ? ` (s.d. ${row.leave_until})` : ''}`
+                          : row.student_status === 'INACTIVE'
+                            ? 'Non Aktif'
+                            : row.student_status || '-',
+                started_at: row.started_at
+                    ? typeof row.started_at === 'string'
+                        ? row.started_at.split('T')[0]
+                        : row.started_at
+                    : '-',
+                last_active_at: row.last_active_at
+                    ? typeof row.last_active_at === 'string'
+                        ? row.last_active_at.split('T')[0]
+                        : row.last_active_at
+                    : '-',
+            })),
+        );
         this.styleHeader(summarySheet);
 
         const sheet = workbook.addWorksheet('Detail Absensi');
@@ -398,12 +423,31 @@ export class ReportService implements IReportService {
             { header: 'Tanggal', key: 'scheduled_date', width: 14 },
             { header: 'Kelas', key: 'class_name', width: 24 },
             { header: 'Siswa', key: 'student_name', width: 28 },
+            { header: 'Status Siswa', key: 'student_status', width: 16 },
+            { header: 'Terakhir Aktif', key: 'last_active_at', width: 16 },
             { header: 'Guru', key: 'teacher_name', width: 24 },
             { header: 'Cabang', key: 'branch_name', width: 20 },
-            { header: 'Status', key: 'attendance_status', width: 14 },
+            { header: 'Status Kehadiran', key: 'attendance_status', width: 16 },
             { header: 'Catatan', key: 'notes', width: 30 },
         ];
-        sheet.addRows(detail.data);
+        sheet.addRows(
+            detail.data.map((row: any) => ({
+                ...row,
+                student_status:
+                    row.student_status === 'ACTIVE'
+                        ? 'Aktif'
+                        : row.student_status === 'ON_LEAVE'
+                          ? `Cuti${row.leave_until ? ` (s.d. ${row.leave_until})` : ''}`
+                          : row.student_status === 'INACTIVE'
+                            ? 'Non Aktif'
+                            : row.student_status || '-',
+                last_active_at: row.last_active_at
+                    ? typeof row.last_active_at === 'string'
+                        ? row.last_active_at.split('T')[0]
+                        : row.last_active_at
+                    : '-',
+            })),
+        );
         this.styleHeader(sheet);
 
         return Buffer.from(await workbook.xlsx.writeBuffer());

@@ -79,6 +79,7 @@ export const rescheduleSessionSchema = z
             end_time: timeSchema,
             teacher_id: z.number().int().positive(),
             notes: z.string().max(500).optional().nullable(),
+            force: z.boolean().optional(),
         }),
     })
     .refine((data) => data.body.end_time > data.body.start_time, {
@@ -130,7 +131,7 @@ export const addSessionStudentSchema = z.object({
     params: z.object({ sessionId: idParam }),
     body: z.object({
         student_program_id: z.number().int().positive(),
-        attendance_status: attendanceStatusSchema.optional(),
+        attendance_status: attendanceStatusSchema.optional().nullable(),
         notes: z.string().max(500).optional().nullable(),
     }),
 });
@@ -139,7 +140,7 @@ export const updateSessionStudentSchema = z.object({
     params: z.object({ sessionId: idParam, studentProgramId: idParam }),
     body: z
         .object({
-            attendance_status: attendanceStatusSchema.optional(),
+            attendance_status: attendanceStatusSchema.optional().nullable(),
             notes: z.string().max(500).optional().nullable(),
         })
         .refine((data) => Object.keys(data).length > 0, {
@@ -150,7 +151,7 @@ export const updateSessionStudentSchema = z.object({
 export const attendanceSchema = z.object({
     params: z.object({ sessionId: idParam, studentProgramId: idParam }),
     body: z.object({
-        attendance_status: attendanceStatusSchema,
+        attendance_status: attendanceStatusSchema.nullable(),
         notes: z.string().max(500).optional().nullable(),
     }),
 });
@@ -162,7 +163,7 @@ export const bulkAttendanceSchema = z.object({
             .array(
                 z.object({
                     student_program_id: z.number().int().positive(),
-                    attendance_status: attendanceStatusSchema,
+                    attendance_status: attendanceStatusSchema.nullable().optional(),
                     notes: z.string().max(500).optional().nullable(),
                 }),
             )

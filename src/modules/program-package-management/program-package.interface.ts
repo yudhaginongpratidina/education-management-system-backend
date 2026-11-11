@@ -28,6 +28,7 @@ export interface IProgramPackageRepository {
     ): Promise<any>;
 
     update_package(data: {
+        id?: number;
         old_slug: string;
         new_slug: string;
         program_id: number;
@@ -71,7 +72,7 @@ export interface IProgramPackageService {
 
     update_package(data: {
         slug: string;
-        program_slug: string;
+        program_slug?: string;
         name: string;
         duration_months: number;
         sessions_per_period: number;

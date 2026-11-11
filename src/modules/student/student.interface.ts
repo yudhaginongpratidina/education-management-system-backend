@@ -26,7 +26,39 @@ export interface Student {
     program_package_id?: number;
     package_name?: string;
     program_status?: string;
+    started_at?: string | Date;
+    ended_at?: string | Date;
+    last_active_at?: string | Date;
+    leave_until?: string | Date;
     student_programs?: any[];
+}
+
+export type StudentStatusType =
+    | 'ACTIVE'
+    | 'ON_LEAVE'
+    | 'INACTIVE'
+    | 'PENDING'
+    | 'TRIAL'
+    | 'COMPLETED'
+    | 'CANCELLED'
+    | 'EXPIRED';
+
+export interface StudentStatusHistory {
+    id: number;
+    student_id: number;
+    student_program_id?: number | null;
+    status: StudentStatusType;
+    start_date: string;
+    end_date?: string | null;
+    reason?: string | null;
+    change_type: 'MANUAL' | 'AUTOMATIC';
+    notes?: string | null;
+    created_by?: number | null;
+    created_at: Date;
+    updated_at: Date;
+    branch_name?: string;
+    program_name?: string;
+    level_name?: string;
 }
 
 export interface AssignStudentProgramDTO {
@@ -35,9 +67,12 @@ export interface AssignStudentProgramDTO {
     program_level_id: number;
     program_package_id?: number;
     program_slug?: string;
-    status?: 'PENDING' | 'TRIAL' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'EXPIRED';
+    status?: StudentStatusType;
     started_at?: string;
     ended_at?: string;
+    last_active_at?: string;
+    leave_until?: string;
+    reason?: string;
     normal_price?: number;
     selling_price?: number;
     notes?: string;
@@ -68,6 +103,8 @@ export interface IStudentRepository {
         status: string;
         started_at?: string;
         ended_at?: string;
+        last_active_at?: string;
+        leave_until?: string;
         normal_price: number;
         selling_price: number;
         notes?: string;
@@ -76,4 +113,25 @@ export interface IStudentRepository {
         session_period?: string;
         total_sessions?: number;
     }): Promise<any>;
+    getStatusHistory(studentId: number): Promise<StudentStatusHistory[]>;
+    addStatusHistory(data: {
+        student_id: number;
+        student_program_id?: number | null;
+        status: StudentStatusType;
+        start_date: string;
+        end_date?: string | null;
+        reason?: string | null;
+        change_type?: 'MANUAL' | 'AUTOMATIC';
+        notes?: string | null;
+        created_by?: number | null;
+    }): Promise<StudentStatusHistory>;
+    deleteStatusHistory(studentId: number, historyId: number): Promise<void>;
+    checkAndAutoUpdateLeaveStatus(): Promise<void>;
+    getExportData(filters?: { studentId?: number; branchId?: number }): Promise<{
+        students: any[];
+        programs: any[];
+        histories: any[];
+        branchName?: string;
+        studentName?: string;
+    }>;
 }

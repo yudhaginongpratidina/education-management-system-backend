@@ -45,12 +45,19 @@ export class StudentController {
     };
 
     export = async (req: Request, res: Response) => {
-        const buffer = await this.studentService.exportStudentsExcel();
+        const studentId = req.query.student_id ? Number(req.query.student_id) : undefined;
+        const branchId = req.query.branch_id ? Number(req.query.branch_id) : undefined;
+
+        const { buffer, filename } = await this.studentService.exportStudentsExcel({
+            studentId,
+            branchId,
+        });
+
         res.setHeader(
             'Content-Type',
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         );
-        res.setHeader('Content-Disposition', 'attachment; filename="data-siswa.xlsx"');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.send(buffer);
     };
 
@@ -134,6 +141,53 @@ export class StudentController {
             success: true,
             message: `Berhasil meng-assign ${result.length} siswa ke cabang dan program`,
             data: result,
+        });
+    };
+
+    getStatusHistory = async (req: Request, res: Response) => {
+        const studentId = Number(req.params.id);
+        const history = await this.studentService.getStatusHistory(studentId);
+        res.status(200).json({
+            success: true,
+            data: history,
+        });
+    };
+
+    addStatusHistory = async (req: Request, res: Response) => {
+        const studentId = Number(req.params.id);
+        const { status, start_date, end_date, reason, change_type, notes } = req.body;
+
+        if (!status || !start_date) {
+            return res.status(400).json({
+                success: false,
+                message: 'Status dan Tanggal Mulai wajib diisi',
+            });
+        }
+
+        const record = await this.studentService.addStatusHistory({
+            student_id: studentId,
+            status,
+            start_date: String(start_date).slice(0, 10),
+            end_date: end_date ? String(end_date).slice(0, 10) : null,
+            reason: reason || null,
+            change_type: change_type || 'MANUAL',
+            notes: notes || null,
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'Riwayat status berhasil ditambahkan dan status siswa diperbarui',
+            data: record,
+        });
+    };
+
+    deleteStatusHistory = async (req: Request, res: Response) => {
+        const studentId = Number(req.params.id);
+        const historyId = Number(req.params.historyId);
+        await this.studentService.deleteStatusHistory(studentId, historyId);
+        res.status(200).json({
+            success: true,
+            message: 'Riwayat status berhasil dihapus',
         });
     };
 }

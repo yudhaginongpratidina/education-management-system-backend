@@ -1,4 +1,10 @@
-import type { IStudentRepository, Student, AssignStudentProgramDTO } from './student.interface';
+import type {
+    IStudentRepository,
+    Student,
+    AssignStudentProgramDTO,
+    StudentStatusHistory,
+    StudentStatusType,
+} from './student.interface';
 import { HttpError } from '../../core/errors/http.error';
 import { ErrorCodes } from '../../core/errors/error-codes';
 import { StudentExcelHelper, type ParsedStudentRow } from './student.excel';
@@ -57,9 +63,22 @@ export class StudentService {
         return await this.studentRepository.delete(id);
     }
 
-    async exportStudentsExcel(): Promise<Buffer> {
-        const students = await this.studentRepository.findAll();
-        return await StudentExcelHelper.generateExportExcel(students);
+    async exportStudentsExcel(filters: { studentId?: number; branchId?: number } = {}): Promise<{
+        buffer: Buffer;
+        filename: string;
+    }> {
+        const data = await this.studentRepository.getExportData(filters);
+        return await StudentExcelHelper.generateComprehensiveExportExcel({
+            students: data.students,
+            programs: data.programs,
+            histories: data.histories,
+            filters: {
+                studentId: filters.studentId,
+                branchId: filters.branchId,
+                branchName: data.branchName,
+                studentName: data.studentName,
+            },
+        });
     }
 
     async getImportTemplateExcel(): Promise<Buffer> {
@@ -192,6 +211,14 @@ export class StudentService {
               ? computeEndedAt(startedAt, totalMonths)
               : undefined;
 
+        const lastActiveAt = dto.last_active_at
+            ? String(dto.last_active_at).slice(0, 10)
+            : dto.status === 'ON_LEAVE' || dto.status === 'INACTIVE'
+              ? startedAt
+              : undefined;
+
+        const leaveUntil = dto.leave_until ? String(dto.leave_until).slice(0, 10) : undefined;
+
         const normalPrice =
             dto.normal_price !== undefined
                 ? Number(dto.normal_price)
@@ -211,6 +238,8 @@ export class StudentService {
                 status: dto.status ?? 'ACTIVE',
                 started_at: startedAt,
                 ended_at: endedAt,
+                last_active_at: lastActiveAt,
+                leave_until: leaveUntil,
                 normal_price: normalPrice,
                 selling_price: sellingPrice,
                 notes: dto.notes,
@@ -219,9 +248,54 @@ export class StudentService {
                 session_period: sessionPeriod,
                 total_sessions: totalSessions,
             });
+
+            // Automatically record in status history
+            try {
+                await this.studentRepository.addStatusHistory({
+                    student_id: Number(studentId),
+                    student_program_id: assigned.id,
+                    status: (dto.status as StudentStatusType) ?? 'ACTIVE',
+                    start_date: startedAt,
+                    end_date: dto.status === 'ON_LEAVE' ? leaveUntil || null : endedAt || null,
+                    reason:
+                        dto.reason ||
+                        (dto.status === 'ACTIVE'
+                            ? 'Pendaftaran & Mulai Belajar'
+                            : dto.status === 'ON_LEAVE'
+                              ? 'Pengajuan Cuti'
+                              : 'Non Aktif'),
+                    change_type: 'AUTOMATIC',
+                    notes: dto.notes,
+                });
+            } catch (err) {
+                console.error('Failed to auto-record status history:', err);
+            }
+
             results.push(assigned);
         }
 
         return results;
+    }
+
+    async getStatusHistory(studentId: number): Promise<StudentStatusHistory[]> {
+        return this.studentRepository.getStatusHistory(studentId);
+    }
+
+    async addStatusHistory(data: {
+        student_id: number;
+        student_program_id?: number | null;
+        status: StudentStatusType;
+        start_date: string;
+        end_date?: string | null;
+        reason?: string | null;
+        change_type?: 'MANUAL' | 'AUTOMATIC';
+        notes?: string | null;
+        created_by?: number | null;
+    }): Promise<StudentStatusHistory> {
+        return this.studentRepository.addStatusHistory(data);
+    }
+
+    async deleteStatusHistory(studentId: number, historyId: number): Promise<void> {
+        return this.studentRepository.deleteStatusHistory(studentId, historyId);
     }
 }

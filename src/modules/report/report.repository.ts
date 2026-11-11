@@ -153,6 +153,10 @@ export class ReportRepository implements IReportRepository {
                 s.id AS student_id,
                 s.full_name AS student_name,
                 sp.branch_id,
+                sp.status AS student_status,
+                sp.started_at,
+                sp.last_active_at,
+                sp.leave_until,
                 b.name AS branch_name,
                 cs.scheduled_date,
                 cs.start_time,
@@ -185,6 +189,10 @@ export class ReportRepository implements IReportRepository {
                 s.id AS student_id,
                 s.full_name AS student_name,
                 b.name AS branch_name,
+                sp.status AS student_status,
+                sp.started_at,
+                sp.last_active_at,
+                sp.leave_until,
                 COUNT(*) AS total,
                 SUM(CASE WHEN css.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) AS present,
                 SUM(CASE WHEN css.attendance_status = 'ABSENT' THEN 1 ELSE 0 END) AS absent,
@@ -197,7 +205,7 @@ export class ReportRepository implements IReportRepository {
              JOIN students s ON sp.student_id = s.id
              LEFT JOIN branches b ON sp.branch_id = b.id
              ${this.where(conditions)}
-             GROUP BY s.id, s.full_name, b.name
+             GROUP BY s.id, s.full_name, b.name, sp.status, sp.started_at, sp.last_active_at, sp.leave_until
              ORDER BY absent DESC, s.full_name ASC`,
             values,
         );

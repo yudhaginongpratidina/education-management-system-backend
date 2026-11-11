@@ -4,9 +4,19 @@ export interface StudentProgram {
     branch_id: number;
     program_package_id: number;
     program_level_id: number;
-    status: 'PENDING' | 'TRIAL' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'EXPIRED';
+    status:
+        | 'PENDING'
+        | 'TRIAL'
+        | 'ACTIVE'
+        | 'ON_LEAVE'
+        | 'INACTIVE'
+        | 'COMPLETED'
+        | 'CANCELLED'
+        | 'EXPIRED';
     started_at?: Date;
     ended_at?: Date;
+    last_active_at?: Date;
+    leave_until?: Date;
     normal_price: number;
     selling_price: number;
     notes?: string;
@@ -58,4 +68,20 @@ export interface IStudentProgramRepository {
     delete(id: number): Promise<void>;
     getPackage(packageId: number): Promise<any | null>;
     getSessionUsage(studentProgramId: number): Promise<any>;
+    syncStatusToAllPrograms(
+        studentId: number,
+        status: string,
+        leaveUntil?: string | null,
+        lastActiveAt?: string | null,
+    ): Promise<void>;
+    recordStatusHistory(data: {
+        student_id: number;
+        student_program_id?: number | null;
+        status: string;
+        start_date: string;
+        end_date?: string | null;
+        reason?: string | null;
+        change_type?: string;
+        notes?: string | null;
+    }): Promise<void>;
 }

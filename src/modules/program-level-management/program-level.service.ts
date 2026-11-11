@@ -10,6 +10,9 @@ export class ProgramLevelService implements IProgramLevelService {
     ) {}
 
     private async get_program_id_by_slug(program_slug: string): Promise<number> {
+        if (!program_slug) {
+            throw new HttpError(400, 'Program slug is required', 'PROGRAM_SLUG_REQUIRED', true);
+        }
         const programs = await this.programRepo.get_program({ slug: program_slug });
         if (programs.length === 0) {
             throw new HttpError(404, 'Program not found', 'PROGRAM_NOT_FOUND', true);

@@ -80,6 +80,7 @@ export class ProgramPackageRepository implements IProgramPackageRepository {
     }
 
     async update_package(data: {
+        id?: number;
         old_slug: string;
         new_slug: string;
         program_id: number;
@@ -92,6 +93,27 @@ export class ProgramPackageRepository implements IProgramPackageRepository {
         bonus_duration_months: number;
         status: 'ACTIVE' | 'INACTIVE';
     }): Promise<any> {
+        if (data.id) {
+            const query = `UPDATE program_packages SET program_id = ?, slug = ?, name = ?, duration_months = ?, sessions_per_period = ?, session_period = ?, normal_price = ?, selling_price = ?, bonus_duration_months = ?, status = ? WHERE id = ?;`;
+            await this.db.query(query, [
+                data.program_id,
+                data.new_slug,
+                data.name,
+                data.duration_months,
+                data.sessions_per_period,
+                data.session_period,
+                data.normal_price,
+                data.selling_price,
+                data.bonus_duration_months,
+                data.status,
+                data.id,
+            ]);
+
+            const selectQuery = `SELECT * FROM program_packages WHERE id = ? LIMIT 1;`;
+            const result = await this.db.query(selectQuery, [data.id]);
+            return result.rows[0];
+        }
+
         const query = `UPDATE program_packages SET program_id = ?, slug = ?, name = ?, duration_months = ?, sessions_per_period = ?, session_period = ?, normal_price = ?, selling_price = ?, bonus_duration_months = ?, status = ? WHERE slug = ?;`;
         await this.db.query(query, [
             data.program_id,

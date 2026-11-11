@@ -119,13 +119,27 @@ export class ClassSessionStudentService implements IClassSessionStudentService {
             sessionId,
         );
 
+        const initialAttendance =
+            data.attendance_status ??
+            (studentProgram?.status === 'ON_LEAVE' ? 'PERMISSION' : 'ABSENT');
+        const initialNotes =
+            data.notes ?? (studentProgram?.status === 'ON_LEAVE' ? 'Siswa Sedang Cuti' : null);
+
         try {
             await this.repository.create({
                 session_id: sessionId,
                 student_program_id: data.student_program_id,
-                attendance_status: data.attendance_status ?? 'ABSENT',
-                notes: data.notes ?? null,
+                attendance_status: initialAttendance,
+                notes: initialNotes,
             });
+
+            if (initialAttendance === 'PRESENT') {
+                await this.repository.recordAttendanceActivity(
+                    data.student_program_id,
+                    session.scheduled_date,
+                    session.class_name,
+                );
+            }
         } catch (error) {
             if (isDuplicateEntryError(error)) {
                 throw new HttpError(
@@ -146,14 +160,22 @@ export class ClassSessionStudentService implements IClassSessionStudentService {
         studentProgramId: number,
         data: { attendance_status?: SessionAttendanceStatus; notes?: string | null },
     ): Promise<any> {
-        await this.getSessionOrFail(sessionId);
+        const session = await this.getSessionOrFail(sessionId);
         await this.getParticipantOrFail(sessionId, studentProgramId);
 
         if (data.attendance_status !== undefined) {
             this.assertValidAttendance(data.attendance_status);
         }
 
-        return await this.repository.update(sessionId, studentProgramId, data);
+        const result = await this.repository.update(sessionId, studentProgramId, data);
+        if (data.attendance_status === 'PRESENT') {
+            await this.repository.recordAttendanceActivity(
+                studentProgramId,
+                session.scheduled_date,
+                session.class_name,
+            );
+        }
+        return result;
     }
 
     async removeSessionStudent(sessionId: number, studentProgramId: number): Promise<any> {
@@ -185,24 +207,36 @@ export class ClassSessionStudentService implements IClassSessionStudentService {
     async updateAttendance(
         sessionId: number,
         studentProgramId: number,
-        data: { attendance_status: SessionAttendanceStatus; notes?: string | null },
+        data: { attendance_status?: SessionAttendanceStatus | null; notes?: string | null },
     ): Promise<any> {
         const session = await this.getSessionOrFail(sessionId);
         this.assertSessionAcceptsAttendance(session);
-        this.assertValidAttendance(data.attendance_status);
+        if (data.attendance_status) {
+            this.assertValidAttendance(data.attendance_status);
+        }
         await this.getParticipantOrFail(sessionId, studentProgramId);
 
-        return await this.repository.update(sessionId, studentProgramId, {
-            attendance_status: data.attendance_status,
+        const updated = await this.repository.update(sessionId, studentProgramId, {
+            attendance_status: data.attendance_status ?? null,
             notes: data.notes,
         });
+
+        if (data.attendance_status === 'PRESENT') {
+            await this.repository.recordAttendanceActivity(
+                studentProgramId,
+                session.scheduled_date,
+                session.class_name,
+            );
+        }
+
+        return updated;
     }
 
     async bulkUpdateAttendance(
         sessionId: number,
         records: {
             student_program_id: number;
-            attendance_status: SessionAttendanceStatus;
+            attendance_status?: SessionAttendanceStatus | null;
             notes?: string | null;
         }[],
     ): Promise<any> {
@@ -210,24 +244,33 @@ export class ClassSessionStudentService implements IClassSessionStudentService {
         this.assertSessionAcceptsAttendance(session);
 
         for (const record of records) {
-            this.assertValidAttendance(record.attendance_status);
+            if (record.attendance_status) {
+                this.assertValidAttendance(record.attendance_status);
+            }
             await this.getParticipantOrFail(sessionId, record.student_program_id);
         }
 
         return await this.db.transaction!(async (tx) => {
             const updated: any[] = [];
             for (const record of records) {
-                updated.push(
-                    await this.repository.update(
-                        sessionId,
-                        record.student_program_id,
-                        {
-                            attendance_status: record.attendance_status,
-                            notes: record.notes,
-                        },
-                        tx,
-                    ),
+                const res = await this.repository.update(
+                    sessionId,
+                    record.student_program_id,
+                    {
+                        attendance_status: record.attendance_status ?? null,
+                        notes: record.notes,
+                    },
+                    tx,
                 );
+                if (record.attendance_status === 'PRESENT') {
+                    await this.repository.recordAttendanceActivity(
+                        record.student_program_id,
+                        session.scheduled_date,
+                        session.class_name,
+                        tx,
+                    );
+                }
+                updated.push(res);
             }
             return updated;
         });
@@ -244,8 +287,31 @@ export class ClassSessionStudentService implements IClassSessionStudentService {
         data: { target_session_id: number; reason?: string | null; created_by?: number | null },
     ): Promise<any> {
         const source = await this.getSessionOrFail(sessionId);
-        this.assertSessionAcceptsParticipants(source);
-        await this.getParticipantOrFail(sessionId, studentProgramId);
+        if (source.status === 'CANCELLED' || source.status === 'RESCHEDULED') {
+            throw new HttpError(
+                409,
+                'Cannot reschedule student from a cancelled or rescheduled session',
+                'INVALID_SESSION_STATUS_TRANSITION',
+                true,
+            );
+        }
+        const participant = await this.getParticipantOrFail(sessionId, studentProgramId);
+        if (participant.attendance_status === 'PRESENT') {
+            throw new HttpError(
+                400,
+                'Siswa sudah tercatat hadir pada sesi ini dan tidak dapat dijadwalkan ulang',
+                'STUDENT_ALREADY_ATTENDED',
+                true,
+            );
+        }
+        if (participant.attendance_status === 'RESCHEDULED') {
+            throw new HttpError(
+                409,
+                'Siswa sudah pernah dijadwalkan ulang dari sesi ini',
+                'ALREADY_RESCHEDULED',
+                true,
+            );
+        }
 
         const targetId = Number(data.target_session_id);
         if (!targetId) {
@@ -303,12 +369,21 @@ export class ClassSessionStudentService implements IClassSessionStudentService {
 
         const isMember = await this.repository.isMemberOfClass(target.class_id, studentProgramId);
         if (!isMember) {
-            throw new HttpError(
-                400,
-                'Student is not an active member of the target class',
-                'STUDENT_NOT_IN_CLASS',
-                true,
-            );
+            if (Number(enrollment.branch_id) === Number(target.branch_id)) {
+                await this.db.query!(
+                    `INSERT INTO class_students (class_id, student_program_id, joined_at)
+                     VALUES (?, ?, ?)
+                     ON DUPLICATE KEY UPDATE left_at = NULL;`,
+                    [target.class_id, studentProgramId, targetDate],
+                );
+            } else {
+                throw new HttpError(
+                    400,
+                    'Student is not an active member of the target class',
+                    'STUDENT_NOT_IN_CLASS',
+                    true,
+                );
+            }
         }
 
         const existingTarget = await this.repository.findParticipant(targetId, studentProgramId);
@@ -370,6 +445,29 @@ export class ClassSessionStudentService implements IClassSessionStudentService {
                 target_date: targetDate,
             };
         });
+    }
+
+    async getRescheduleTargets(sessionId: number, studentProgramId: number): Promise<any[]> {
+        await this.getSessionOrFail(sessionId);
+        await this.getParticipantOrFail(sessionId, studentProgramId);
+        const targets = await this.repository.findRescheduleTargets(sessionId, studentProgramId);
+
+        // Filter out targets that conflict with student's other sessions
+        const nonConflicting: any[] = [];
+        for (const target of targets) {
+            const targetDate = toDateOnly(target.scheduled_date) as string;
+            const conflicts = await this.repository.findStudentConflicts(
+                studentProgramId,
+                targetDate,
+                target.start_time,
+                target.end_time,
+                target.id,
+            );
+            if (conflicts.length === 0) {
+                nonConflicting.push(target);
+            }
+        }
+        return nonConflicting;
     }
 
     /**

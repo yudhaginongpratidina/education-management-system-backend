@@ -173,4 +173,50 @@ export class StudentProgramRepository implements IStudentProgramRepository {
         );
         return result.rows[0] ?? {};
     }
+
+    async syncStatusToAllPrograms(
+        studentId: number,
+        status: string,
+        leaveUntil?: string | null,
+        lastActiveAt?: string | null,
+    ): Promise<void> {
+        const leaveUntilVal = status === 'ON_LEAVE' ? (leaveUntil ?? null) : null;
+        await this.db.query(
+            `UPDATE student_programs 
+             SET status = ?, 
+                 leave_until = ?,
+                 last_active_at = COALESCE(?, last_active_at),
+                 updated_at = NOW()
+             WHERE student_id = ? 
+               AND status NOT IN ('COMPLETED', 'CANCELLED', 'EXPIRED');`,
+            [status, leaveUntilVal, lastActiveAt ?? null, studentId],
+        );
+    }
+
+    async recordStatusHistory(data: {
+        student_id: number;
+        student_program_id?: number | null;
+        status: string;
+        start_date: string;
+        end_date?: string | null;
+        reason?: string | null;
+        change_type?: string;
+        notes?: string | null;
+    }): Promise<void> {
+        await this.db.query(
+            `INSERT INTO student_status_history 
+                (student_id, student_program_id, status, start_date, end_date, reason, change_type, notes, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW());`,
+            [
+                data.student_id,
+                data.student_program_id ?? null,
+                data.status,
+                data.start_date,
+                data.end_date ?? null,
+                data.reason ?? null,
+                data.change_type ?? 'MANUAL',
+                data.notes ?? null,
+            ],
+        );
+    }
 }

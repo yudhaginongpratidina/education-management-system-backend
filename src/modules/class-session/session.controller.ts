@@ -311,4 +311,24 @@ export class SessionController implements ISessionController {
             next(error);
         }
     };
+
+    getRescheduleTargets = async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<void> => {
+        try {
+            const response = await this.sessionStudentService.getRescheduleTargets(
+                Number(req.params.sessionId),
+                Number(req.params.studentProgramId),
+            );
+            res.status(200).json({
+                success: true,
+                message: 'Available reschedule targets fetched',
+                data: response,
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
 }

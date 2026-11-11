@@ -159,7 +159,7 @@ export class ClassSessionService implements IClassSessionService {
                 {
                     session_id: session.id,
                     student_program_id: studentProgramId,
-                    attendance_status: (attendanceStatus as any) ?? 'ABSENT',
+                    attendance_status: (attendanceStatus as any) ?? null,
                     notes: notes ?? null,
                 },
                 executor,
@@ -435,7 +435,7 @@ export class ClassSessionService implements IClassSessionService {
                             {
                                 session_id: session.id,
                                 student_program_id: studentProgramId,
-                                attendance_status: 'ABSENT',
+                                attendance_status: null,
                                 notes: null,
                             },
                             tx,
@@ -660,6 +660,16 @@ export class ClassSessionService implements IClassSessionService {
             );
 
             for (const participant of participants) {
+                await this.sessionStudentRepository.update(
+                    id,
+                    participant.student_program_id,
+                    {
+                        attendance_status: 'RESCHEDULED',
+                        notes: data.notes ?? 'Sesi dijadwalkan ulang',
+                    },
+                    tx,
+                );
+
                 await this.sessionStudentRepository.create(
                     {
                         session_id: created.id,
@@ -721,12 +731,30 @@ export class ClassSessionService implements IClassSessionService {
                 (assignment: any) => assignment.role === 'SUBSTITUTE',
             );
             if (!isSubstitute) {
-                throw new HttpError(
-                    400,
-                    'Teacher is not an allowed substitute for this class',
-                    'TEACHER_NOT_ALLOWED_AS_SUBSTITUTE',
-                    true,
-                );
+                const assignedToBranch =
+                    await this.classTeacherRepository.isTeacherAssignedToBranch(
+                        data.teacher_id,
+                        klass.branch_id,
+                    );
+                if (assignedToBranch) {
+                    await this.classTeacherRepository.create(
+                        {
+                            class_id: klass.id,
+                            teacher_id: data.teacher_id,
+                            role: 'SUBSTITUTE',
+                            started_at: existing.scheduled_date,
+                            ended_at: null,
+                        },
+                        tx,
+                    );
+                } else {
+                    throw new HttpError(
+                        400,
+                        'Guru bukan pengganti terdaftar untuk kelas ini atau tidak berada di cabang yang sama',
+                        'TEACHER_NOT_ALLOWED_AS_SUBSTITUTE',
+                        true,
+                    );
+                }
             }
 
             const assignedToBranch = await this.classTeacherRepository.isTeacherAssignedToBranch(

@@ -1,6 +1,7 @@
 import type { DatabaseClient } from '../../config/database/types';
 import type { QueryExecutor, SessionAttendanceStatus } from '../../shared/class/class.types';
 import type { IClassSessionStudentRepository } from './class-session.interface';
+import { toDateOnly } from '../../shared/class/class.util';
 
 export class ClassSessionStudentRepository implements IClassSessionStudentRepository {
     constructor(private readonly db: DatabaseClient) {}
@@ -14,10 +15,20 @@ export class ClassSessionStudentRepository implements IClassSessionStudentReposi
             SELECT
                 css.session_id,
                 css.student_program_id,
-                css.attendance_status,
-                css.notes,
+                CASE 
+                    WHEN sp.status = 'ON_LEAVE' AND (css.attendance_status = 'ABSENT' OR css.attendance_status IS NULL) THEN 'PERMISSION'
+                    ELSE css.attendance_status 
+                END as attendance_status,
+                CASE
+                    WHEN sp.status = 'ON_LEAVE' AND (css.notes IS NULL OR css.notes = '') THEN 'Siswa Sedang Cuti'
+                    ELSE css.notes
+                END as notes,
                 sp.student_id,
                 sp.branch_id,
+                sp.status as program_status,
+                sp.started_at,
+                sp.last_active_at,
+                sp.leave_until,
                 s.full_name as student_name,
                 pp.name as package_name,
                 pl.name as level_name
@@ -47,7 +58,7 @@ export class ClassSessionStudentRepository implements IClassSessionStudentReposi
         data: {
             session_id: number;
             student_program_id: number;
-            attendance_status?: SessionAttendanceStatus;
+            attendance_status?: SessionAttendanceStatus | null;
             notes?: string | null;
         },
         executor?: QueryExecutor,
@@ -60,7 +71,7 @@ export class ClassSessionStudentRepository implements IClassSessionStudentReposi
         await this.executor(executor).query(query, [
             data.session_id,
             data.student_program_id,
-            data.attendance_status ?? 'ABSENT',
+            data.attendance_status ?? null,
             data.notes ?? null,
         ]);
     }
@@ -68,7 +79,7 @@ export class ClassSessionStudentRepository implements IClassSessionStudentReposi
     async update(
         sessionId: number,
         studentProgramId: number,
-        data: { attendance_status?: SessionAttendanceStatus; notes?: string | null },
+        data: { attendance_status?: SessionAttendanceStatus | null; notes?: string | null },
         executor?: QueryExecutor,
     ): Promise<any> {
         const fields: string[] = [];
@@ -110,7 +121,7 @@ export class ClassSessionStudentRepository implements IClassSessionStudentReposi
 
     async getStudentProgram(studentProgramId: number): Promise<any> {
         const result = await this.db.query(
-            `SELECT id, student_id, branch_id, status, started_at, ended_at,
+            `SELECT id, student_id, branch_id, status, started_at, ended_at, last_active_at, leave_until,
                     total_sessions, sessions_per_period, session_period
              FROM student_programs WHERE id = ? LIMIT 1;`,
             [studentProgramId],
@@ -208,5 +219,110 @@ export class ClassSessionStudentRepository implements IClassSessionStudentReposi
             [classId],
         );
         return result.rows;
+    }
+
+    async findRescheduleTargets(sessionId: number, studentProgramId: number): Promise<any[]> {
+        const sp = await this.getStudentProgram(studentProgramId);
+        if (!sp) return [];
+
+        const startedAt = toDateOnly(sp.started_at);
+        const endedAt = toDateOnly(sp.ended_at);
+
+        const conditions: string[] = [
+            'cs.id <> ?',
+            "cs.status = 'SCHEDULED'",
+            '(c.branch_id = ? OR sp.branch_id = ?)',
+            `NOT EXISTS (
+                SELECT 1 FROM class_session_students css
+                WHERE css.session_id = cs.id AND css.student_program_id = ?
+            )`,
+        ];
+        const values: unknown[] = [sessionId, sp.branch_id, sp.branch_id, studentProgramId];
+
+        if (startedAt) {
+            conditions.push('cs.scheduled_date >= ?');
+            values.push(startedAt);
+        }
+        if (endedAt) {
+            conditions.push('cs.scheduled_date <= ?');
+            values.push(endedAt);
+        }
+
+        const query = `
+            SELECT
+                cs.id,
+                cs.class_id,
+                c.name AS class_name,
+                c.code AS class_code,
+                c.branch_id,
+                cs.scheduled_date,
+                cs.start_time,
+                cs.end_time,
+                cs.status,
+                t.full_name AS teacher_name,
+                (SELECT COUNT(*) FROM class_session_students css_cnt WHERE css_cnt.session_id = cs.id) AS participant_count
+            FROM class_sessions cs
+            JOIN classes c ON cs.class_id = c.id
+            JOIN student_programs sp ON sp.id = ?
+            LEFT JOIN teachers t ON cs.teacher_id = t.id
+            WHERE ${conditions.join(' AND ')}
+            ORDER BY cs.scheduled_date ASC, cs.start_time ASC
+            LIMIT 100;
+        `;
+        values.unshift(studentProgramId);
+
+        const result = await this.db.query(query, values);
+        return result.rows;
+    }
+
+    async recordAttendanceActivity(
+        studentProgramId: number,
+        sessionDate: string,
+        sessionTitle?: string,
+        executor?: QueryExecutor,
+    ): Promise<void> {
+        const exec = this.executor(executor);
+        const spResult = await exec.query(
+            `SELECT id, student_id, status, last_active_at FROM student_programs WHERE id = ? LIMIT 1;`,
+            [studentProgramId],
+        );
+        const sp = spResult.rows[0];
+        if (!sp) return;
+
+        const dateStr = sessionDate
+            ? typeof sessionDate === 'string' && sessionDate.includes('T')
+                ? sessionDate.split('T')[0]
+                : sessionDate
+            : new Date().toISOString().split('T')[0];
+
+        // If student is currently ON_LEAVE or INACTIVE, automatically reactivate ALL their programs to ACTIVE
+        if (sp.status === 'ON_LEAVE' || sp.status === 'INACTIVE') {
+            await exec.query(
+                `UPDATE student_programs 
+                 SET status = 'ACTIVE', last_active_at = ?, leave_until = NULL, updated_at = NOW() 
+                 WHERE student_id = ? AND status IN ('ON_LEAVE', 'INACTIVE');`,
+                [dateStr, sp.student_id],
+            );
+
+            await exec.query(
+                `INSERT INTO student_status_history 
+                    (student_id, student_program_id, status, start_date, reason, change_type, notes, created_at, updated_at)
+                 VALUES (?, ?, 'ACTIVE', ?, 'Hadir Sesi Pembelajaran', 'AUTOMATIC', ?, NOW(), NOW());`,
+                [
+                    sp.student_id,
+                    studentProgramId,
+                    dateStr,
+                    `Status otomatis diaktifkan kembali untuk seluruh program karena siswa tercatat HADIR pada sesi pembelajaran${sessionTitle ? ` (${sessionTitle})` : ''}.`,
+                ],
+            );
+        } else {
+            // Student is already ACTIVE or other status: update last_active_at for all their programs if null or if session date is newer/current
+            await exec.query(
+                `UPDATE student_programs 
+                 SET last_active_at = ?, updated_at = NOW() 
+                 WHERE student_id = ? AND (last_active_at IS NULL OR last_active_at <= ?);`,
+                [dateStr, sp.student_id, dateStr],
+            );
+        }
     }
 }

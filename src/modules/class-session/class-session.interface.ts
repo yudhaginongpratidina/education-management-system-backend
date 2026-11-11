@@ -129,6 +129,13 @@ export interface IClassSessionStudentRepository {
     ): Promise<any>;
     getQuotaUsage(studentProgramId: number): Promise<any>;
     findClassMembersWithQuota(classId: number): Promise<any>;
+    findRescheduleTargets(sessionId: number, studentProgramId: number): Promise<any[]>;
+    recordAttendanceActivity(
+        studentProgramId: number,
+        sessionDate: string,
+        sessionTitle?: string,
+        executor?: QueryExecutor,
+    ): Promise<void>;
 }
 
 export interface IClassSessionStudentService {
@@ -155,6 +162,7 @@ export interface IClassSessionStudentService {
         data: { target_session_id: number; reason?: string | null; created_by?: number | null },
     ): Promise<any>;
     getClassStudentQuotas(classId: number): Promise<any[]>;
+    getRescheduleTargets(sessionId: number, studentProgramId: number): Promise<any[]>;
 }
 
 // ============================================================
@@ -190,5 +198,6 @@ export interface ISessionController {
     updateAttendance(req: Request, res: Response, next: NextFunction): Promise<void>;
     bulkUpdateAttendance(req: Request, res: Response, next: NextFunction): Promise<void>;
     rescheduleStudent(req: Request, res: Response, next: NextFunction): Promise<void>;
+    getRescheduleTargets(req: Request, res: Response, next: NextFunction): Promise<void>;
     getClassStudentQuotas(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

@@ -47,7 +47,18 @@ export const updateThemeSchema = z.object({
                     .optional()
                     .default('image_text'),
                 iconName: z.string().max(100).optional().default('mdi:school'),
+                hasBorder: z.boolean().optional(),
+                borderWidth: z.union([z.number(), z.string()]).optional(),
+                borderColor: z.string().optional(),
+                borderStyle: z.enum(['solid', 'dashed', 'dotted']).optional(),
+                borderRadius: z.string().optional(),
+                padding: z.union([z.number(), z.string()]).optional(),
+                hasBackground: z.boolean().optional(),
+                backgroundColor: z.string().optional(),
+                aspectRatio: z.enum(['square', 'wide', 'auto']).optional(),
+                imageFit: z.enum(['contain', 'cover']).optional(),
             })
+            .passthrough()
             .optional(),
     }),
 });

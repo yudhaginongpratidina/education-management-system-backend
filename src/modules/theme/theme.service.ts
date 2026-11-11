@@ -35,6 +35,16 @@ export const DEFAULT_BANYAN_THEME: AppThemeConfig = {
         subtitle: 'Bimbel Management',
         type: 'image_text',
         iconName: 'mdi:school',
+        hasBorder: false,
+        borderWidth: 1,
+        borderColor: '',
+        borderStyle: 'solid',
+        borderRadius: 'inherit',
+        padding: 0,
+        hasBackground: false,
+        backgroundColor: 'transparent',
+        aspectRatio: 'square',
+        imageFit: 'contain',
     },
 };
 

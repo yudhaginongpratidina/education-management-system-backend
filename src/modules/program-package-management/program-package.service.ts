@@ -15,6 +15,9 @@ export class ProgramPackageService implements IProgramPackageService {
     ) {}
 
     private async get_program_id_by_slug(program_slug: string): Promise<number> {
+        if (!program_slug) {
+            throw new HttpError(400, 'Program slug is required', 'PROGRAM_SLUG_REQUIRED', true);
+        }
         const programs = await this.programRepo.get_program({ slug: program_slug });
         if (programs.length === 0) {
             throw new HttpError(404, 'Program not found', 'PROGRAM_NOT_FOUND', true);
@@ -36,7 +39,7 @@ export class ProgramPackageService implements IProgramPackageService {
         const program_id = await this.get_program_id_by_slug(data.program_slug);
         const slug = create_slug(data.name);
 
-        const existing = await this.repo.get_packages({ slug });
+        const existing = await this.repo.get_packages({ program_id, slug });
         if (existing.length > 0) {
             throw new HttpError(400, 'Package already exists', 'PACKAGE_ALREADY_EXISTS', true);
         }
@@ -70,7 +73,7 @@ export class ProgramPackageService implements IProgramPackageService {
 
     async update_package(data: {
         slug: string;
-        program_slug: string;
+        program_slug?: string;
         name: string;
         duration_months: number;
         sessions_per_period: number;
@@ -85,16 +88,20 @@ export class ProgramPackageService implements IProgramPackageService {
             throw new HttpError(404, 'Package not found', 'PACKAGE_NOT_FOUND', true);
         }
 
-        const program_id = await this.get_program_id_by_slug(data.program_slug);
+        const program_id = data.program_slug
+            ? await this.get_program_id_by_slug(data.program_slug)
+            : existing[0].program_id;
+
         const newSlug = create_slug(data.name);
         if (newSlug !== data.slug) {
-            const packageWithNewSlug = await this.repo.get_packages({ slug: newSlug });
+            const packageWithNewSlug = await this.repo.get_packages({ program_id, slug: newSlug });
             if (packageWithNewSlug.length > 0) {
                 throw new HttpError(400, 'Package already exists', 'PACKAGE_ALREADY_EXISTS', true);
             }
         }
 
         return await this.repo.update_package({
+            id: existing[0].id,
             old_slug: data.slug,
             new_slug: newSlug,
             program_id,
