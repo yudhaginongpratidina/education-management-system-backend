@@ -384,5 +384,56 @@ await connection.query(`
 `);
 console.log('✔ app_themes ready');
 
+// ---------------------------------------------------------------------------
+// 9. student_programs — last_active_at, leave_until & updated status ENUM
+// ---------------------------------------------------------------------------
+await connection.query(`
+    ALTER TABLE student_programs 
+    MODIFY COLUMN status ENUM('PENDING','TRIAL','ACTIVE','ON_LEAVE','INACTIVE','COMPLETED','CANCELLED','EXPIRED') NOT NULL DEFAULT 'PENDING';
+`);
+await addColumnIfMissing('student_programs', 'last_active_at', '`last_active_at` DATE NULL');
+await addColumnIfMissing('student_programs', 'leave_until', '`leave_until` DATE NULL');
+
+// ---------------------------------------------------------------------------
+// 10. student_status_history — tracking student leave/active status history
+// ---------------------------------------------------------------------------
+await connection.query(`
+    CREATE TABLE IF NOT EXISTS student_status_history (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        student_id BIGINT UNSIGNED NOT NULL,
+        student_program_id BIGINT UNSIGNED NULL,
+        status ENUM('ACTIVE', 'ON_LEAVE', 'INACTIVE', 'PENDING', 'TRIAL', 'COMPLETED', 'CANCELLED', 'EXPIRED') NOT NULL,
+        start_date DATE NOT NULL,
+        end_date DATE NULL,
+        reason VARCHAR(255) NULL,
+        change_type ENUM('MANUAL', 'AUTOMATIC') NOT NULL DEFAULT 'MANUAL',
+        notes TEXT NULL,
+        created_by BIGINT UNSIGNED NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        INDEX idx_ssh_student_id (student_id),
+        INDEX idx_ssh_student_program_id (student_program_id),
+        INDEX idx_ssh_status (status),
+        INDEX idx_ssh_start_date (start_date),
+        CONSTRAINT fk_ssh_student
+            FOREIGN KEY (student_id)
+            REFERENCES students(id)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE,
+        CONSTRAINT fk_ssh_student_program
+            FOREIGN KEY (student_program_id)
+            REFERENCES student_programs(id)
+            ON DELETE SET NULL
+            ON UPDATE CASCADE,
+        CONSTRAINT fk_ssh_user
+            FOREIGN KEY (created_by)
+            REFERENCES users(id)
+            ON DELETE SET NULL
+            ON UPDATE CASCADE
+    );
+`);
+console.log('✔ student_status_history ready');
+
 await connection.end();
 console.log('\n✅ Migration finished.');

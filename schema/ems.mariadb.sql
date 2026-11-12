@@ -322,12 +322,16 @@ CREATE TABLE student_programs (
         'PENDING',
         'TRIAL',
         'ACTIVE',
+        'ON_LEAVE',
+        'INACTIVE',
         'COMPLETED',
         'CANCELLED',
         'EXPIRED'
     ) NOT NULL DEFAULT 'PENDING',
     started_at DATE NULL,
     ended_at DATE NULL,
+    last_active_at DATE NULL,
+    leave_until DATE NULL,
     normal_price DECIMAL(12,2) NOT NULL DEFAULT 0,
     selling_price DECIMAL(12,2) NOT NULL DEFAULT 0,
     notes VARCHAR(255) NULL,
@@ -363,6 +367,44 @@ CREATE TABLE student_programs (
         FOREIGN KEY (program_level_id)
         REFERENCES program_levels(id)
         ON DELETE RESTRICT
+        ON UPDATE CASCADE
+);
+
+-- ============================================================
+-- TABEL STUDENT STATUS HISTORY
+-- ============================================================
+CREATE TABLE IF NOT EXISTS student_status_history (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    student_id BIGINT UNSIGNED NOT NULL,
+    student_program_id BIGINT UNSIGNED NULL,
+    status ENUM('ACTIVE', 'ON_LEAVE', 'INACTIVE', 'PENDING', 'TRIAL', 'COMPLETED', 'CANCELLED', 'EXPIRED') NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NULL,
+    reason VARCHAR(255) NULL,
+    change_type ENUM('MANUAL', 'AUTOMATIC') NOT NULL DEFAULT 'MANUAL',
+    notes TEXT NULL,
+    created_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    INDEX idx_ssh_student_id (student_id),
+    INDEX idx_ssh_student_program_id (student_program_id),
+    INDEX idx_ssh_status (status),
+    INDEX idx_ssh_start_date (start_date),
+    CONSTRAINT fk_ssh_student
+        FOREIGN KEY (student_id)
+        REFERENCES students(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_ssh_student_program
+        FOREIGN KEY (student_program_id)
+        REFERENCES student_programs(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_ssh_user
+        FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
         ON UPDATE CASCADE
 );
 
