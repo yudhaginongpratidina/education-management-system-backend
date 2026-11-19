@@ -9,6 +9,7 @@ const birthDateSchema = z.union([z.string().date(), z.string().datetime({ offset
 export const createStudentSchema = z.object({
     body: z.object({
         full_name: z.string().min(1, 'Full name is required'),
+        photo: z.string().optional().nullable(),
         address: z.string().optional(),
         place_birth: z.string().optional(),
         birth_date: birthDateSchema.optional(), // Assumes ISO string
@@ -26,6 +27,7 @@ export const createStudentSchema = z.object({
 export const updateStudentSchema = z.object({
     body: z.object({
         full_name: z.string().optional(),
+        photo: z.string().optional().nullable(),
         address: z.string().optional(),
         place_birth: z.string().optional(),
         birth_date: birthDateSchema.optional(),

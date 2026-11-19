@@ -7,6 +7,7 @@ export interface CashflowFilter {
     date_to?: string;
     type?: CashflowType;
     branch_id?: number;
+    student_id?: number;
     category?: string;
     search?: string;
     page?: number;
@@ -15,6 +16,7 @@ export interface CashflowFilter {
 
 export interface CashflowInput {
     branch_id?: number | null;
+    student_id?: number | null;
     transaction_date: string;
     type: CashflowType;
     category?: string | null;

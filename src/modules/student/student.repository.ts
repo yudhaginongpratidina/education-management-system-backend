@@ -12,13 +12,14 @@ export class StudentRepository implements IStudentRepository {
     async create(data: Omit<Student, 'id' | 'created_at' | 'updated_at'>): Promise<Student> {
         const query = `
             INSERT INTO students (
-                full_name, address, place_birth, birth_date, school_level,
+                full_name, photo, address, place_birth, birth_date, school_level,
                 father_name, mother_name, guardian_name, guardian_phone_number,
                 instagram, information_source, photos_of_children_may_be_posted
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         `;
         await this.db.query(query, [
             data.full_name,
+            data.photo ?? null,
             data.address ?? null,
             data.place_birth ?? null,
             data.birth_date ?? null,
@@ -395,9 +396,10 @@ export class StudentRepository implements IStudentRepository {
         }
 
         if (filters.studentId) {
-            const sRes = await this.db.query('SELECT full_name FROM students WHERE id = ? LIMIT 1;', [
-                filters.studentId,
-            ]);
+            const sRes = await this.db.query(
+                'SELECT full_name FROM students WHERE id = ? LIMIT 1;',
+                [filters.studentId],
+            );
             if (sRes.rows.length > 0) studentName = sRes.rows[0].full_name;
         }
 

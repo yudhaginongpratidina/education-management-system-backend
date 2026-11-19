@@ -33,6 +33,17 @@ export class ThemeRoutes {
             asyncHandler(this.controller.uploadLogo),
         );
 
+        router.post(
+            '/upload-favicon',
+            upload.fields([
+                { name: 'favicon', maxCount: 1 },
+                { name: 'icon', maxCount: 1 },
+                { name: 'image', maxCount: 1 },
+                { name: 'file', maxCount: 1 },
+            ]),
+            asyncHandler(this.controller.uploadFavicon),
+        );
+
         router.put('/', validate(updateThemeSchema), asyncHandler(this.controller.updateTheme));
         router.post('/reset', asyncHandler(this.controller.resetTheme));
 

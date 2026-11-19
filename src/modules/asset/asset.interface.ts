@@ -13,6 +13,7 @@ export interface AssetCategoryInput {
 
 export interface AssetInput {
     name: string;
+    photo?: string | null;
     category_id: number;
     branch_id?: number | null;
     location?: string | null;

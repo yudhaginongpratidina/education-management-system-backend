@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { IStorageController, IStorageService } from './storage.interface';
 import path from 'path';
+import fs from 'fs';
 
 export class StorageController implements IStorageController {
     constructor(private readonly service: IStorageService) {}
@@ -21,9 +22,20 @@ export class StorageController implements IStorageController {
     get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const slug = req.params.slug as string;
-            const fileData = await this.service.get(slug);
+            // Check direct match in uploads
+            const directPath = path.join(process.cwd(), 'uploads', slug);
+            if (fs.existsSync(directPath) && !fs.statSync(directPath).isDirectory()) {
+                res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+                res.setHeader('Access-Control-Allow-Origin', '*');
+                return res.sendFile(directPath);
+            }
 
+            const fileData = await this.service.get(slug);
             const filePath = path.join(process.cwd(), 'uploads', fileData.slug);
+            if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+                res.status(404).json({ success: false, message: 'File not found on disk' });
+                return;
+            }
             res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
             res.setHeader('Access-Control-Allow-Origin', '*');
             res.sendFile(filePath);

@@ -174,6 +174,7 @@ export class CashflowService implements ICashflowService {
         sheet.columns = [
             { header: 'Tanggal', key: 'transaction_date', width: 14 },
             { header: 'Keterangan', key: 'description', width: 34 },
+            { header: 'Siswa', key: 'student_name', width: 22 },
             { header: 'Kategori', key: 'category', width: 20 },
             { header: 'Cabang', key: 'branch_name', width: 20 },
             { header: 'Masuk', key: 'income', width: 16 },
@@ -187,6 +188,7 @@ export class CashflowService implements ICashflowService {
             rows.map((row) => ({
                 transaction_date: row.transaction_date,
                 description: row.description,
+                student_name: row.student_name ?? '-',
                 category: row.category,
                 branch_name: row.branch_name,
                 income: row.type === 'INCOME' ? num(row.amount) : null,

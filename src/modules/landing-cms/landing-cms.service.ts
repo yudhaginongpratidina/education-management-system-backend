@@ -5,11 +5,14 @@ export class LandingCmsService implements ILandingCmsService {
     constructor(private readonly repository: ILandingCmsRepository) {}
 
     async getPublicContent(): Promise<Record<string, any>> {
-        const rows = await this.repository.findAll(true);
+        const rows = await this.repository.findAll(false);
         const content: Record<string, any> = {};
+        const activeSections: Record<string, boolean> = {};
         for (const row of rows) {
             content[row.section_key] = row.content;
+            activeSections[row.section_key] = Boolean(row.is_active);
         }
+        content._activeSections = activeSections;
         return content;
     }
 

@@ -6,6 +6,7 @@ const filterQuery = z.object({
     date_to: dateSchema.optional(),
     type: z.enum(['INCOME', 'EXPENSE']).optional(),
     branch_id: z.coerce.number().int().positive().optional(),
+    student_id: z.coerce.number().int().positive().optional(),
     category: z.string().optional(),
     search: z.string().optional(),
     page: z.coerce.number().int().positive().optional(),
@@ -18,6 +19,7 @@ export const summaryCashflowSchema = z.object({ query: filterQuery });
 export const createCashflowSchema = z.object({
     body: z.object({
         branch_id: z.number().int().positive().optional().nullable(),
+        student_id: z.number().int().positive().optional().nullable(),
         transaction_date: dateSchema,
         type: z.enum(['INCOME', 'EXPENSE']),
         category: z.string().max(100).optional().nullable(),
@@ -34,6 +36,7 @@ export const updateCashflowSchema = z.object({
     body: z
         .object({
             branch_id: z.number().int().positive().optional().nullable(),
+            student_id: z.number().int().positive().optional().nullable(),
             transaction_date: dateSchema.optional(),
             type: z.enum(['INCOME', 'EXPENSE']).optional(),
             category: z.string().max(100).optional().nullable(),

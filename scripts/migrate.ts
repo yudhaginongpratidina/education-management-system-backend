@@ -435,5 +435,13 @@ await connection.query(`
 `);
 console.log('✔ student_status_history ready');
 
+await addColumnIfMissing(
+    'cashflow_transactions',
+    'student_id',
+    '`student_id` BIGINT UNSIGNED NULL AFTER `branch_id`',
+);
+await addColumnIfMissing('assets', 'photo', '`photo` VARCHAR(255) NULL AFTER `name`');
+await addColumnIfMissing('students', 'photo', '`photo` VARCHAR(255) NULL AFTER `full_name`');
+
 await connection.end();
 console.log('\n✅ Migration finished.');

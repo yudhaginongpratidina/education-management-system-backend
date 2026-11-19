@@ -40,6 +40,7 @@ export const updateThemeSchema = z.object({
             .object({
                 url: z.string().optional().default(''),
                 darkUrl: z.string().optional().default(''),
+                faviconUrl: z.string().optional().default(''),
                 text: z.string().max(100).optional().default('BANYAN'),
                 subtitle: z.string().max(150).optional().default('Bimbel Management'),
                 type: z

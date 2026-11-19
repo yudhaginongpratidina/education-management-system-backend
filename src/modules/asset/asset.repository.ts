@@ -135,11 +135,12 @@ export class AssetRepository implements IAssetRepository {
     async createAsset(data: AssetInput): Promise<any> {
         await this.db.query(
             `INSERT INTO assets
-                (name, category_id, branch_id, location, purchase_date, purchase_price,
+                (name, photo, category_id, branch_id, location, purchase_date, purchase_price,
                  useful_life_years, \`condition\`, status, responsible_user_id, responsible_name, notes)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
             [
                 data.name,
+                data.photo ?? null,
                 data.category_id,
                 data.branch_id ?? null,
                 data.location ?? null,

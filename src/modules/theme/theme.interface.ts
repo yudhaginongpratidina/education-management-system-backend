@@ -24,6 +24,7 @@ export interface ThemeColors {
 export interface ThemeLogo {
     url?: string;
     darkUrl?: string;
+    faviconUrl?: string;
     text?: string;
     subtitle?: string;
     type?: 'image' | 'text' | 'image_text' | 'icon';
@@ -86,4 +87,5 @@ export interface IThemeController {
     updateTheme: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     resetTheme: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     uploadLogo: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+    uploadFavicon: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 }

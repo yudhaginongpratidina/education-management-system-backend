@@ -176,12 +176,7 @@ export class StudentExcelHelper {
             });
         });
 
-        applyTableStyling(wsStudents, 'FF1E3A8A', [
-            'no',
-            'status',
-            'birth_date',
-            'photos_allowed',
-        ]);
+        applyTableStyling(wsStudents, 'FF1E3A8A', ['no', 'status', 'birth_date', 'photos_allowed']);
 
         // =====================================================================
         // SHEET 2: PROGRAM SISWA

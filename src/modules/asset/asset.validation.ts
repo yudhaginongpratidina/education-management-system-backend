@@ -58,6 +58,7 @@ export const assetParamsSchema = z.object({
 export const createAssetSchema = z.object({
     body: z.object({
         name: z.string().min(1, 'Nama aset wajib diisi').max(150),
+        photo: z.string().max(255).optional().nullable(),
         category_id: z.number().int().positive(),
         branch_id: z.number().int().positive().optional().nullable(),
         location: z.string().max(150).optional().nullable(),
@@ -77,6 +78,7 @@ export const updateAssetSchema = z.object({
     body: z
         .object({
             name: z.string().min(1).max(150).optional(),
+            photo: z.string().max(255).optional().nullable(),
             category_id: z.number().int().positive().optional(),
             branch_id: z.number().int().positive().optional().nullable(),
             location: z.string().max(150).optional().nullable(),

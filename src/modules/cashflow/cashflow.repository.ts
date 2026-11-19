@@ -24,14 +24,20 @@ export class CashflowRepository implements ICashflowRepository {
             conditions.push('cf.branch_id = ?');
             values.push(filter.branch_id);
         }
+        if (filter.student_id) {
+            conditions.push('cf.student_id = ?');
+            values.push(filter.student_id);
+        }
         if (filter.category) {
             conditions.push('cf.category = ?');
             values.push(filter.category);
         }
         if (filter.search) {
-            conditions.push('(cf.description LIKE ? OR cf.category LIKE ? OR cf.reference LIKE ?)');
+            conditions.push(
+                '(cf.description LIKE ? OR cf.category LIKE ? OR cf.reference LIKE ? OR s.full_name LIKE ?)',
+            );
             const term = `%${filter.search}%`;
-            values.push(term, term, term);
+            values.push(term, term, term, term);
         }
 
         return {
@@ -43,11 +49,12 @@ export class CashflowRepository implements ICashflowRepository {
     async create(data: CashflowInput): Promise<any> {
         await this.db.query(
             `INSERT INTO cashflow_transactions
-                (branch_id, transaction_date, type, category, description, amount,
+                (branch_id, student_id, transaction_date, type, category, description, amount,
                  payment_method, reference, notes, created_by)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
             [
                 data.branch_id ?? null,
+                data.student_id ?? null,
                 data.transaction_date,
                 data.type,
                 data.category ?? null,
@@ -90,9 +97,10 @@ export class CashflowRepository implements ICashflowRepository {
 
     async findById(id: number): Promise<any | null> {
         const result = await this.db.query(
-            `SELECT cf.*, b.name AS branch_name
+            `SELECT cf.*, b.name AS branch_name, s.full_name AS student_name
              FROM cashflow_transactions cf
              LEFT JOIN branches b ON cf.branch_id = b.id
+             LEFT JOIN students s ON cf.student_id = s.id
              WHERE cf.id = ? LIMIT 1;`,
             [id],
         );
@@ -116,6 +124,8 @@ export class CashflowRepository implements ICashflowRepository {
                     cf.id,
                     cf.branch_id,
                     b.name AS branch_name,
+                    cf.student_id,
+                    s.full_name AS student_name,
                     cf.transaction_date,
                     cf.type,
                     cf.category,
@@ -129,6 +139,7 @@ export class CashflowRepository implements ICashflowRepository {
                     CASE WHEN cf.type = 'INCOME' THEN cf.amount ELSE -cf.amount END AS signed
                 FROM cashflow_transactions cf
                 LEFT JOIN branches b ON cf.branch_id = b.id
+                LEFT JOIN students s ON cf.student_id = s.id
                 ${sql}
             ) t
             ORDER BY t.transaction_date DESC, t.id DESC
