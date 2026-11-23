@@ -45,6 +45,7 @@ export const DEFAULT_BANYAN_THEME: AppThemeConfig = {
         backgroundColor: 'transparent',
         aspectRatio: 'square',
         imageFit: 'contain',
+        faviconUrl: '',
     },
 };
 

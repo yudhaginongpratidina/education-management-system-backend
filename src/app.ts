@@ -43,7 +43,16 @@ export const createApp = (): Express => {
     const staticOptions = {
         setHeaders: (res: any) => {
             res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-            res.setHeader('Access-Control-Allow-Origin', '*');
+            const origin = res.req?.headers?.origin;
+            if (
+                origin &&
+                (corsOrigins.includes(origin) || origin.startsWith('http://localhost:'))
+            ) {
+                res.setHeader('Access-Control-Allow-Origin', origin);
+                res.setHeader('Access-Control-Allow-Credentials', 'true');
+            } else {
+                res.setHeader('Access-Control-Allow-Origin', '*');
+            }
         },
     };
     app.use('/storage', express.static('uploads', staticOptions));

@@ -18,8 +18,20 @@ export class StorageService implements IStorageService {
         const nameWithoutExt = path.basename(file.originalname, ext);
         const slug = `${Date.now()}-${create_slug(nameWithoutExt)}${ext}`;
 
-        const newPath = path.join('uploads', slug);
-        await fs.rename(file.path, newPath);
+        const uploadDir = path.join(process.cwd(), 'uploads');
+        await fs.mkdir(uploadDir, { recursive: true });
+        const newPath = path.join(uploadDir, slug);
+
+        try {
+            await fs.rename(file.path, newPath);
+        } catch (err: any) {
+            if (err?.code === 'EXDEV') {
+                await fs.copyFile(file.path, newPath);
+                await fs.unlink(file.path);
+            } else {
+                throw err;
+            }
+        }
 
         return await this.repo.upload({
             original_name: file.originalname,

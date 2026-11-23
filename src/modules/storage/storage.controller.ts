@@ -22,11 +22,21 @@ export class StorageController implements IStorageController {
     get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const slug = req.params.slug as string;
+            const origin = req.headers.origin;
+            const setHeaders = () => {
+                res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+                if (origin) {
+                    res.setHeader('Access-Control-Allow-Origin', origin);
+                    res.setHeader('Access-Control-Allow-Credentials', 'true');
+                } else {
+                    res.setHeader('Access-Control-Allow-Origin', '*');
+                }
+            };
+
             // Check direct match in uploads
             const directPath = path.join(process.cwd(), 'uploads', slug);
             if (fs.existsSync(directPath) && !fs.statSync(directPath).isDirectory()) {
-                res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-                res.setHeader('Access-Control-Allow-Origin', '*');
+                setHeaders();
                 return res.sendFile(directPath);
             }
 
@@ -36,8 +46,7 @@ export class StorageController implements IStorageController {
                 res.status(404).json({ success: false, message: 'File not found on disk' });
                 return;
             }
-            res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-            res.setHeader('Access-Control-Allow-Origin', '*');
+            setHeaders();
             res.sendFile(filePath);
         } catch (error) {
             next(error);
